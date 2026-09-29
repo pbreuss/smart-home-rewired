@@ -1,0 +1,114 @@
+# Board: AI Thinker ESP32-CAM (AI Thinker) # Definition: definitions/boards/esp32cam/manifest.yaml esphome: name: esp32cam-demo-cam friendly_name: esp32cam-demo-cam esp32: variant: esp32 flash_size: 4MB framework: type: esp-idf logger: api: encryption: key: "XXXX" ota: - platform: esphome wifi: ssid: !secret wifi_ssid password: !secret wifi_password ap: ssid: esp32cam-demo-c Fallback Hotspot password: "YYYY" use_address: 192.168.0.142 captive_portal: # Enables PSRAM support. # Most ESP32-CAM boards, including the AI Thinker ESP32-CAM, # need PSRAM for camera buffering. psram: # Defines the I2C bus used by the camera sensor. # On the AI Thinker ESP32-CAM, GPIO26 and GPIO27 are the standard camera I2C pins. i2c: - id: camera_i2c sda: GPIO26 scl: GPIO27 # Main camera configuration. # This creates a camera entity in Home Assistant through the ESPHome integration. esp32_camera: id: demo_camera name: "Demo Kamera" # External clock signal for the camera module. # GPIO0 is the standard XCLK pin on the AI Thinker ESP32-CAM. external_clock: pin: GPIO0 frequency: 20MHz # Connects the camera to the I2C bus defined above. i2c_id: camera_i2c # Parallel data pins from the camera sensor to the ESP32. # These pin assignments are specific to the AI Thinker ESP32-CAM layout. data_pins: - GPIO5 - GPIO18 - GPIO19 - GPIO21 - GPIO36 - GPIO39 - GPIO34 - GPIO35 # Camera synchronization and control pins. vsync_pin: GPIO25 href_pin: GPIO23 pixel_clock_pin: GPIO22 power_down_pin: GPIO32 # Image orientation. # Change these if your camera image is upside down or mirrored. vertical_flip: false horizontal_mirror: false # Camera image settings. # 640x480 is a good starting point: clear enough, but still stable on ESP32-CAM. resolution: 640x480 # JPEG compression quality. # Lower number means better quality but more data. # 10 is a good compromise for Home Assistant. jpeg_quality: 10 # Maximum frame rate while the stream is actively viewed. max_framerate: 10 fps # Frame rate when nobody is watching the stream. # This keeps the camera available while reducing load. idle_framerate: 0.1 fps # Number of frame buffers. # 1 is usually more stable on ESP32-CAM boards with limited memory. frame_buffer_count: 1 # Optional built-in camera web server. # This is useful for testing the camera directly in a browser. esp32_camera_web_server: # Live stream: # Open http://DEVICE-IP:8080 in a browser. - port: 8080 mode: STREAM # Snapshot image: # Open http://DEVICE-IP:8081 in a browser. - port: 8081 mode: SNAPSHOT# Board: AI Thinker ESP32-CAM (AI Thinker)
+# Definition: definitions/boards/esp32cam/manifest.yaml
+
+esphome:
+  name: esp32cam-demo-cam
+  friendly_name: esp32cam-demo-cam
+
+esp32:
+  variant: esp32
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    key: "xxxx"
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: esp32cam-demo-c Fallback Hotspot
+    password: "yyyy"
+
+  use_address: 192.168.0.142
+captive_portal:
+
+# Enables PSRAM support.
+# Most ESP32-CAM boards, including the AI Thinker ESP32-CAM,
+# need PSRAM for camera buffering.
+psram:
+
+# Defines the I2C bus used by the camera sensor.
+# On the AI Thinker ESP32-CAM, GPIO26 and GPIO27 are the standard camera I2C pins.
+i2c:
+  - id: camera_i2c
+    sda: GPIO26
+    scl: GPIO27
+
+# Main camera configuration.
+# This creates a camera entity in Home Assistant through the ESPHome integration.
+esp32_camera:
+  id: demo_camera
+  name: "Demo Kamera"
+
+  # External clock signal for the camera module.
+  # GPIO0 is the standard XCLK pin on the AI Thinker ESP32-CAM.
+  external_clock:
+    pin: GPIO0
+    frequency: 20MHz
+
+  # Connects the camera to the I2C bus defined above.
+  i2c_id: camera_i2c
+
+  # Parallel data pins from the camera sensor to the ESP32.
+  # These pin assignments are specific to the AI Thinker ESP32-CAM layout.
+  data_pins:
+    - GPIO5
+    - GPIO18
+    - GPIO19
+    - GPIO21
+    - GPIO36
+    - GPIO39
+    - GPIO34
+    - GPIO35
+
+  # Camera synchronization and control pins.
+  vsync_pin: GPIO25
+  href_pin: GPIO23
+  pixel_clock_pin: GPIO22
+  power_down_pin: GPIO32
+
+  # Image orientation.
+  # Change these if your camera image is upside down or mirrored.
+  vertical_flip: false
+  horizontal_mirror: false
+
+  # Camera image settings.
+  # 640x480 is a good starting point: clear enough, but still stable on ESP32-CAM.
+  resolution: 640x480
+
+  # JPEG compression quality.
+  # Lower number means better quality but more data.
+  # 10 is a good compromise for Home Assistant.
+  jpeg_quality: 10
+
+  # Maximum frame rate while the stream is actively viewed.
+  max_framerate: 10 fps
+
+  # Frame rate when nobody is watching the stream.
+  # This keeps the camera available while reducing load.
+  idle_framerate: 0.1 fps
+
+  # Number of frame buffers.
+  # 1 is usually more stable on ESP32-CAM boards with limited memory.
+  frame_buffer_count: 1
+
+# Optional built-in camera web server.
+# This is useful for testing the camera directly in a browser.
+esp32_camera_web_server:
+  # Live stream:
+  # Open http://DEVICE-IP:8080 in a browser.
+  - port: 8080
+    mode: STREAM
+
+  # Snapshot image:
+  # Open http://DEVICE-IP:8081 in a browser.
+  - port: 8081
+    mode: SNAPSHOT

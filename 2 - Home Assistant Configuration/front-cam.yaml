@@ -1,0 +1,163 @@
+# Board: AI Thinker ESP32-CAM (AI Thinker)
+# Definition: definitions/boards/esp32cam/manifest.yaml
+
+esphome:
+  name: esp32cam-garagenvorplatz
+  friendly_name: esp32cam-garagenvorplatz
+
+esp32:
+  variant: esp32
+  flash_size: 4MB
+  framework:
+    type: arduino
+
+logger:
+
+api:
+  encryption:
+    key: xxxx
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Improved stability for weak Wi-Fi connections
+  power_save_mode: none
+
+  ap:
+    ssid: esp32cam-garage Fallback Hotspot
+    password: "yyyy"
+
+captive_portal:
+
+binary_sensor:
+  # PIR motion sensor
+  - platform: gpio
+    name: "Garagenvorplatz Camera Motion"
+    id: mailbox_camera_motion
+    device_class: motion
+
+    pin:
+      number: GPIO13
+      mode:
+        input: true
+        pulldown: true
+
+    filters:
+      - delayed_on: 100ms
+      - delayed_off: 5s
+
+    on_press:
+      then:
+        - logger.log: ">>> PIR MOTION DETECTED <<<"
+
+    on_release:
+      then:
+        - logger.log: ">>> PIR IDLE <<<"
+
+  # Magnetic door-opening sensor
+  - platform: gpio
+    name: "Briefklappe"
+    id: briefklappe_sensor
+    device_class: door
+
+    pin:
+      number: GPIO14
+      mode:
+        input: true
+        pullup: true
+
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+    icon: "mdi:email-newsletter"
+
+sensor:
+  # Wi-Fi diagnostics
+  - platform: wifi_signal
+    name: "Garagenvorplatz WiFi Signal"
+    id: garagenvorplatz_wifi_signal
+    update_interval: 30s
+
+  # Useful for detecting unexpected ESP32 reboots
+  - platform: uptime
+    name: "Garagenvorplatz Uptime"
+    id: garagenvorplatz_uptime
+    update_interval: 30s
+
+psram:
+
+i2c:
+  - id: camera_i2c
+    sda: GPIO26
+    scl: GPIO27
+
+output:
+  # White onboard flash LED - PWM dimmable
+  - platform: ledc
+    pin: GPIO4
+    id: builtin_led_output
+    frequency: 1000 Hz
+    channel: 2
+
+light:
+  - platform: monochromatic
+    name: "Mailbox Camera LED"
+    id: mailbox_camera_led
+    output: builtin_led_output
+    restore_mode: ALWAYS_OFF
+
+esp32_camera:
+  id: postbox_camera
+  name: "Garagenvorplatz Kamera"
+
+  external_clock:
+    pin: GPIO0
+    frequency: 20MHz
+
+  i2c_id: camera_i2c
+
+  data_pins:
+    - GPIO5
+    - GPIO18
+    - GPIO19
+    - GPIO21
+    - GPIO36
+    - GPIO39
+    - GPIO34
+    - GPIO35
+
+  vertical_flip: true
+  horizontal_mirror: true
+
+  vsync_pin: GPIO25
+  href_pin: GPIO23
+  pixel_clock_pin: GPIO22
+  power_down_pin: GPIO32
+
+  resolution: 640x480
+  jpeg_quality: 12
+
+  max_framerate: 10 fps
+  idle_framerate: 0.1 fps
+
+  frame_buffer_count: 1
+
+  on_stream_start:
+    then:
+      - logger.log: "Camera stream was started"
+
+  on_stream_stop:
+    then:
+      - logger.log: "Camera stream was stopped"
+
+esp32_camera_web_server:
+  - port: 8080
+    mode: stream
+
+  - port: 8081
+    mode: snapshot

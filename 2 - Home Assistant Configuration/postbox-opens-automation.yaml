@@ -1,0 +1,18 @@
+alias: Postbox opens - turn on LED
+description: ''
+triggers:
+  - trigger: state
+    entity_id:
+      - binary_sensor.esp32cam_mailbox_postbox_tur
+    from:
+      - 'off'
+    to:
+      - 'on'
+conditions: []
+actions:
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
+    data: {}
+mode: single

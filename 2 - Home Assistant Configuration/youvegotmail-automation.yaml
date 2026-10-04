@@ -1,0 +1,82 @@
+alias: Paketbox / Briefschlitz - Foto Benachrichtigung
+description: ''
+triggers:
+  - trigger: state
+    entity_id:
+      - binary_sensor.esp32cam_mailbox_postbox_tur
+      - binary_sensor.garagenvorplatz_esp32cam_garagenvorplatz_briefklappe
+    from: 'on'
+    to: 'off'
+actions:
+  - variables:
+      timestamp: '{{ now().strftime(''%Y%m%d_%H%M%S'') }}'
+      current_image: /media/frigate/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg
+  - action: switch.turn_on
+    target:
+      entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
+  - delay:
+      milliseconds: 3000
+  - action: camera.snapshot
+    target:
+      entity_id: camera.esp32cam_mailbox_postbox_kamera
+    data:
+      filename: '{{ current_image }}'
+  - delay:
+      milliseconds: 1000
+  - action: rest_command.mailbox_classifier
+    data:
+      image: '{{ current_image }}'
+    response_variable: classifier_result
+  - variables:
+      rf_prediction: '{{ classifier_result.content.prediction }}'
+      rf_occupied_probability: '{{ classifier_result.content.occupied_probability | float }}'
+      rf_occupied_percent: >-
+        {{ (classifier_result.content.occupied_probability | float * 100) |
+        round(1) }}
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: '{{ rf_prediction == ''empty'' }}'
+        sequence:
+          - action: shell_command.mailbox_archive
+            data:
+              source: '{{ current_image }}'
+              destination: >-
+                /media/frigate/mailbox_dataset/empty/mailbox_{{ timestamp
+                }}_RF-{{ rf_occupied_percent }}.jpg
+          - action: light.turn_off
+            target:
+              entity_id: light.esp32cam_garagenvorplatz_mailbox_camera_led
+    default:
+      - action: shell_command.mailbox_archive
+        data:
+          source: '{{ current_image }}'
+          destination: >-
+            /media/frigate/mailbox_dataset/occupied/mailbox_{{ timestamp
+            }}_RF-{{ rf_occupied_percent }}.jpg
+      - action: notify.mobile_app_philipps_iphone_15
+        data:
+          title: >
+            {% if trigger.entity_id ==
+            'binary_sensor.esp32cam_mailbox_postbox_tur' %}
+              📬 New mail has arrived!
+            {% else %}
+              ✉️ New mail has arrived!
+            {% endif %}
+          message: >
+            There is something in the mailbox. {{ rf_occupied_percent }}%
+            occupied
+          data:
+            image: >-
+              /media/local/frigate/mailbox_dataset/current/mailbox_{{ timestamp
+              }}.jpg
+      - action: light.turn_on
+        target:
+          entity_id: light.esp32cam_garagenvorplatz_mailbox_camera_led
+        data:
+          brightness_pct: 5
+  - action: switch.turn_off
+    target:
+      entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
+mode: queued
+max: 5

@@ -1,0 +1,130 @@
+# Board: AI Thinker ESP32-CAM (AI Thinker)
+# Definition: definitions/boards/esp32cam/manifest.yaml
+
+esphome:
+  name: esp32cam-mailbox
+  friendly_name: esp32cam-mailbox
+
+esp32:
+  variant: esp32
+  flash_size: 4MB
+  framework:
+    type: arduino
+
+logger:
+  # Serielle Schnittstelle nach dem Flashen nicht für Logs verwenden.
+  #baud_rate: 0
+  
+api:
+  encryption:
+    key: xxxx
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: esp32cam-mailbo Fallback Hotspot
+    password: "yyyy"
+
+captive_portal:
+
+binary_sensor:
+  - platform: gpio
+    id: tuer_sensor_1
+    name: "Postbox Tür"
+    device_class: door
+    pin:
+      number: GPIO13
+      mode:
+        input: true
+        pullup: true
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+    icon: "mdi:door"
+
+  - platform: gpio
+    id: muell_schiebe_sensor
+    name: "Trash Sliding Door"
+    device_class: opening
+    pin:
+      number: GPIO14
+      mode:
+        input: true
+        pullup: true
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+    
+psram:
+
+i2c:
+  - id: camera_i2c
+    sda: GPIO26
+    scl: GPIO27
+
+esp32_camera:
+  id: postbox_camera
+  name: "Postbox Camera"
+
+  external_clock:
+    pin: GPIO0
+    frequency: 20MHz
+
+  i2c_id: camera_i2c
+
+  data_pins:
+    - GPIO5
+    - GPIO18
+    - GPIO19
+    - GPIO21
+    - GPIO36
+    - GPIO39
+    - GPIO34
+    - GPIO35
+
+  vertical_flip: true
+  horizontal_mirror: false
+
+  vsync_pin: GPIO25
+  href_pin: GPIO23
+  pixel_clock_pin: GPIO22
+  power_down_pin: GPIO32
+
+  resolution: 640x480
+  jpeg_quality: 0
+  max_framerate: 10 fps
+  idle_framerate: 0.1 fps
+  frame_buffer_count: 1
+
+  on_stream_start:
+    then:
+      - logger.log: "Camera stream has been started"
+      - switch.turn_on: mailbox_led
+
+  on_stream_stop:
+    then:
+      - logger.log: "Camera stream has been stopped"
+      - delay: 5s
+      - switch.turn_off: mailbox_led
+
+esp32_camera_web_server:
+  - port: 8080
+    mode: STREAM
+  - port: 8081
+    mode: SNAPSHOT
+
+
+output:
+  - platform: gpio
+    pin: GPIO2
+    id: led_mosfet
+
+switch:
+  - platform: output
+    id: mailbox_led
+    name: "Mailbox LED Test"
+    output: led_mosfet

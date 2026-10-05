@@ -1,0 +1,98 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+
+#logger:
+#  default: info
+#  logs:
+#    homeassistant.components.homekit: debug
+#    homeassistant.components.homekit.type_cameras: debug
+#    pyhap: debug
+    
+homekit:
+        
+  - name: Demo Camera
+    port: 21080
+    mode: accessory
+    filter:
+      include_entities:
+        - camera.garagenvorplatz_democam_ccab4aaf_frigate
+
+    entity_config:
+      camera.garagenvorplatz_democam_ccab4aaf_frigate:
+        stream_address: 192.168.0.182
+        stream_source: -rtsp_transport tcp -i rtsp://ccab4aaf-frigate:8554/democam
+        support_audio: false
+        max_width: 640
+        max_height: 480
+        max_fps: 10                
+        
+  - name: Garagenvorplatz Camera
+    port: 21079
+    mode: accessory
+    filter:
+      include_entities:
+        - camera.garagenvorplatz_garagenvorplatz_ccab4aaf_frigate
+
+    entity_config:
+      camera.ccab4aaf_frigate:
+        stream_address: 192.168.0.182
+        stream_source: -rtsp_transport tcp -i rtsp://ccab4aaf-frigate:8554/garagenvorplatz
+        support_audio: false
+        max_width: 640
+        max_height: 480
+        max_fps: 10
+
+  - name: Mailbox Camera
+    port: 21081
+    mode: accessory
+
+    filter:
+      include_entities:
+        - camera.garagenvorplatz_mailboxcam_ccab4aaf_frigate
+
+    entity_config:
+      camera.garagenvorplatz_mailboxcam_ccab4aaf_frigate:
+        stream_address: 192.168.0.182
+        stream_source: -rtsp_transport tcp -i rtsp://ccab4aaf-frigate:8554/mailbox
+        support_audio: false
+        max_width: 640
+        max_height: 480
+        max_fps: 10
+
+  - name: Home Assistant Bridge
+    port: 21064
+    filter:
+      include_entities:
+        - switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test 
+        
+rest_command:
+  image_compare:
+    url: "http://local-image-compare:8099/compare"
+    method: POST
+    content_type: "application/json"
+    payload: >
+      {
+        "current_image": "{{ current_image }}"
+      }
+      
+  mailbox_classifier:
+    url: "http://local-mailbox-classifier:8098/classify"
+    method: POST
+    content_type: "application/json"
+    payload: >
+      {
+        "image": "{{ image }}"
+      }      
+      
+shell_command:
+  mailbox_archive: 'cp "{{ source }}" "{{ destination }}"'

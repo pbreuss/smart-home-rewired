@@ -1,0 +1,75 @@
+mqtt:
+  enabled: false
+  host: core-mosquitto
+  port: 1883
+  user: frigate
+  password: "I2faknsf$sefji"
+
+go2rtc:
+  streams:
+    mailbox:
+      - "ffmpeg:http://192.168.0.173:8080/#video=h264"
+    #garagenvorplatz:
+    #  - "ffmpeg:http://192.168.0.141:8080/#video=h264"
+    # added date time
+    garagenvorplatz:
+      - "ffmpeg:http://192.168.0.141:8080/#video=h264#drawtext=x=10:y=10:fontsize=18:fontcolor=white:box=1:boxcolor=black"
+    democam:
+      - "ffmpeg:http://192.168.0.142:8080/#video=h264"
+
+record:
+  enabled: true
+  motion:
+    days: 7
+
+cameras:
+  mailbox:
+    enabled: true
+
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/mailbox
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - record
+
+    detect:
+      enabled: false
+    record:
+      enabled: false
+      
+  garagenvorplatz:
+    enabled: true
+
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/garagenvorplatz
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - record
+
+    detect:
+      enabled: false
+    record:
+      enabled: false
+
+  democam:
+    enabled: true
+
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/democam
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - record
+
+    detect:
+      enabled: false
+    record:
+      enabled: false
+
+
+version: 0.17-0

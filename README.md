@@ -10,8 +10,6 @@ The goal is to share how the pieces fit together, explain the decisions behind t
 
 ### 🪟 Project 1: Wired Windows Alarm System with a Shelly Plus Uni
 
-[![Watch the tutorial on YouTube](https://img.youtube.com/vi/Z5pvdCxU6XdX9ljr/hqdefault.jpg)](https://youtu.be/4L2JkF9nJzo?si=Z5pvdCxU6XdX9ljr)
-
 ▶️ [Watch the full tutorial on YouTube](https://youtu.be/4L2JkF9nJzo?si=Z5pvdCxU6XdX9ljr)
 
 ### 📬 Project 2: Smart Mailbox
@@ -28,8 +26,10 @@ A custom-built mailbox that connects physical deliveries to your smart home.
 
 The accompanying YouTube series covers three parts:
 
-1. Part 1: **Build the mailbox:** CNC milling, 3D printing, and assembly.
+1. Part 1: **Build the mailbox:** CNC milling, 3D printing, and assembly. ▶️ [Watch part 1 on YouTube](https://youtu.be/XzQ9WoWxce0?si=BizN_u7Tf7Vb2fHA)
+
 2. Part 2: **Make it smart:** sensors, cameras, ESPHome, Home Assistant, and HomeKit integration.
+
 3. Part 3: **Add AI:** training and integrating mailbox content detection. (Coming soon)
 
 ### 🔓 Project 3: Fingerprint-controlled garage (coming soon)

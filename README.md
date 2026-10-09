@@ -28,7 +28,7 @@ The accompanying YouTube series covers three parts:
 
 1. Part 1: **Build the mailbox:** CNC milling, 3D printing, and assembly. ▶️ [Watch on YouTube](https://youtu.be/XzQ9WoWxce0?si=BizN_u7Tf7Vb2fHA)
 
-2. Part 2: **Make it smart:** sensors, cameras, ESPHome, Home Assistant, and HomeKit integration. ▶️ [Watch on YouTube](https://youtu.be/viE7irL0ePo)
+2. Part 2: **Make it smart:** sensors, cameras, ESPHome, Home Assistant, and HomeKit integration. ▶️ [Watch on YouTube](https://youtu.be/Od1dRFKWPP0)
 
 3. Part 3: **Add AI:** training and integrating mailbox content detection. (Coming soon)
 

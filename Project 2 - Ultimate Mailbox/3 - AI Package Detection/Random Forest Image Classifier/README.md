@@ -1,4 +1,5 @@
-# Mailbox Classifier HOG
+# Random Forest Image Classifier HOG
+by Smart Phone Rewired
 
 A lightweight, fully local image-classification project for detecting whether a smart mailbox is **empty** or **occupied**.
 

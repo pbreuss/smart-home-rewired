@@ -1,0 +1,28 @@
+{
+  "classifier": "hog_color_random_forest",
+  "classes": [
+    "empty",
+    "occupied"
+  ],
+  "feature_count": 9809,
+  "training_images": 409,
+  "class_counts": {
+    "empty": 269,
+    "occupied": 140
+  },
+  "n_estimators": 400,
+  "random_state": 42,
+  "hog_size": [
+    160,
+    120
+  ],
+  "hog_orientations": 9,
+  "hog_pixels_per_cell": [
+    8,
+    8
+  ],
+  "hog_cells_per_block": [
+    2,
+    2
+  ]
+}

@@ -1,11 +1,11 @@
-# Random Forest Image Classifier HOG
+# Image Classifier RFHOG
 by Smart Home Rewired, Oct 2026
 
-A lightweight, fully local image-classification Home Assistant App, that can be used to classify images.
+**A lightweight, fully local image-classification Home Assistant App, that can be used to classify images from within an automation.**
 
-In this sample use case the classifier is used to evaluate images taken inside a mailbox, to determine if the mailbox contains mail.
+In this sample use case the classifier is used to evaluate images taken inside a mailbox triggered by an Home Assistant automation, to determine if the mailbox contains mail.
 
-The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier**. 
+The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier (RF)**. 
 
 Training and evaluation is done in a Jupyter notebook (see [training/random_forest_training.ipynb](training/random_forest_training.ipynb)), and the trained model can be deployed as a local **Home Assistant App** and called directly from Home Assistant automations.
 
@@ -83,26 +83,25 @@ This approach is lightweight, fast, fully local, and does not require cloud infe
 # Repository structure
 
 ```text
-smart-home-rewired / Project 2 - Ultimate Mailbox/AI Package Detection / Random Forest Image Classifier/
+smart-home-rewired / Project 2 - Ultimate Mailbox/AI Package Detection / Image Classification /
 │
-├── images/
-│   └── mailalgo_final_updated.gif # animated gif to show flow of sample use case
-│
-├── training/
-│   └── mailbox_random_forest_training.ipynb # use this script to train your model based on your own images
+├── training/image_classifier_rfhog_training/
+│   └── image_classifier_rfhog_training.ipynb # use this script to train your model based on your own images
 │   └── requirements-training.txt # use this environment for training
 │
 ├── models/
 │   └── mailbox_rf.joblib        # created after training; usually not committed
 │   └── mailbox_rf_metadata.json # auto generated, based on the last training run
 │
-├── home-assistant-app/
-│   └── mailbox-classifier/
+├── home-assistant-apps/
+│   └── image_classifier_rfhog_ha_app/
 │       ├── config.yaml
 │       ├── Dockerfile
 │       ├── app.py
 │       ├── run.sh
 │       └── requirements.txt
+│       ├── images/
+│       │   └── mailalgo_final_updated.gif # animated gif to show flow of sample use case
 │
 └── README.md
 ```
@@ -112,7 +111,7 @@ The important separation is:
 - `training/` contains the training pipeline
 - DATASET_DIR contains labeled training images (to be setup in the training script)
 - `models/` contains trained model
-- `home-assistant-app/` contains the runtime service used inside Home Assistant
+- `home-assistant-app/image_classifier_rfhog_ha_app/` contains the runtime service used inside Home Assistant
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Build it. Connect it. Make it smart.**
 
-Practical DIY smart home projects combining custom hardware, Home Assistant, ESPHome, and AI. Created by Philipp Breuss-Schneeweis, this project brings together software engineering and hands-on making—from CNC milling and 3D printing to camera integration and machine learning.
+Practical DIY smart home projects combining custom hardware, Home Assistant, ESPHome, and AI. This project brings together software engineering and hands-on making—from CNC milling and 3D printing to camera integration and machine learning.
 
 The goal is to share how the pieces fit together, explain the decisions behind them, and help you adapt the ideas to your own home.
 
@@ -22,11 +22,9 @@ A custom-built mailbox that connects physical deliveries to your smart home.
 - Interior LED lighting for photographs and an exterior indicator for mail.
 - Home Assistant automations for snapshots and delivery notifications.
 - Camera integration with Frigate, go2rtc, and Apple HomeKit.
-- AI classification to distinguish an empty mailbox from one containing mail, using Histogram of Oriented Gradients (HOG) features and a Random Forest classifier ▶️ [See README for ](Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Random%20Forest%20Image%20Classifier) 
+- AI classification to distinguish an empty mailbox from one containing mail, using Histogram of Oriented Gradients (HOG) features and a Random Forest classifier. [See separate README for this classifier](Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Random%20Forest%20Image%20Classifier) 
 
-
-
-
+For the mailbox classifier, start with the classifier project's README and training notebook. Camera position, lighting, and mailbox contents affect results, so train and evaluate with images from your own setup.
 
 The accompanying YouTube series covers three parts:
 
@@ -61,8 +59,6 @@ For Home Assistant and ESPHome examples:
 2. Adapt entity IDs, network addresses, stream URLs, and credentials to your setup.
 3. Keep passwords, API keys, and other credentials out of Git; use `secrets.yaml` where supported.
 4. Validate configurations before installing them and test individual components before enabling complete automations.
-
-For the mailbox classifier, start with the classifier project's README and training notebook. Camera position, lighting, and mailbox contents affect results, so train and evaluate with images from your own setup.
 
 ## A work in progress
 

@@ -1,6 +1,6 @@
 # Smart Home Rewired
 
-**Build it. Connect it. Make it smart.**
+**Build it. Connect it. Make it smart!**
 
 Practical DIY smart home projects combining custom hardware, Home Assistant, ESPHome, and AI. Created by Philipp Breuss-Schneeweis, this project brings together software engineering and hands-on making—from CNC milling and 3D printing to camera integration and machine learning.
 

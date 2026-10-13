@@ -7,7 +7,7 @@ In this sample use case the classifier is used to evaluate images taken inside a
 
 The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier (RF)**. 
 
-Training and evaluation is done in a Jupyter notebook (see [training/image_classifier_rfhog_training.ipynb](training/image_classifier_rfhog_training.ipynb)), and the trained model can be deployed as a local **Home Assistant App** and called directly from Home Assistant automations.
+Training and evaluation is done in a Jupyter notebook (see [training/image_classifier_rfhog_training.ipynb](../../training/image_classifier_rfhog_training.ipynb)), and the trained model can be deployed as a local **Home Assistant App** and called directly from Home Assistant automations.
 
 The classifier itself only needs images, a trained model, and a Python runtime. Instructions how to install and use this classifier with Home Assistant are below.
 

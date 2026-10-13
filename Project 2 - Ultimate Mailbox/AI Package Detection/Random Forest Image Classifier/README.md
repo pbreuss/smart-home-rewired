@@ -1,12 +1,19 @@
 # Random Forest Image Classifier HOG
-by Smart Phone Rewired
+by Smart Home Rewired, Oct 2026
 
-A lightweight, fully local image-classification project for detecting whether a smart mailbox is **empty** or **occupied**.
+A lightweight, fully local image-classification Home Assistant App, that can be used to classify images.
 
-The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier**. Training and evaluation are done in a Jupyter notebook, and the trained model can be deployed as a local **Home Assistant App** and called directly from Home Assistant automations.
+In this sample use case it is used to evaluate if a smart mailbox is **empty** or **occupied**.
 
-The project was built as part of a larger Smart Mailbox system using an ESP32-CAM, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. Those components are optional: the classifier itself only needs images, a trained model, and a Python runtime.
+The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier**. 
 
+Training and evaluation is done in a Jupyter notebook (see training/random_forest_training.ipynb), and the trained model can be deployed as a local **Home Assistant App** and called directly from Home Assistant automations.
+
+The classifier itself only needs images, a trained model, and a Python runtime.
+
+The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. 
+
+![Smart Mailbox automation](images/mailalgo_final_updated.gif)
 ---
 
 ## What it does

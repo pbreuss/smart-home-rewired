@@ -22,7 +22,7 @@ A custom-built mailbox that connects physical deliveries to your smart home.
 - Interior LED lighting for photographs and an exterior indicator for mail.
 - Home Assistant automations for snapshots and delivery notifications.
 - Camera integration with Frigate, go2rtc, and Apple HomeKit.
-- AI classification to distinguish an empty mailbox from one containing mail, using Histogram of Oriented Gradients (HOG) features and a Random Forest classifier.
+- AI classification to distinguish an empty mailbox from one containing mail, using Histogram of Oriented Gradients (HOG) features and a Random Forest classifier. [<See>](AI%20Package%20Detection/Random%20Forest%20Image%20Classifier) 
 
 The accompanying YouTube series covers three parts:
 

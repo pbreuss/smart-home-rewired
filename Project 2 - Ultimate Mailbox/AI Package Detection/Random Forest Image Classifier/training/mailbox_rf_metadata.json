@@ -5,10 +5,17 @@
     "occupied"
   ],
   "feature_count": 9809,
-  "training_images": 409,
+  "training_images": 327,
+  "test_images": 82,
+  "test_accuracy": 0.9878048780487805,
+  "test_size": 0.2,
   "class_counts": {
-    "empty": 269,
-    "occupied": 140
+    "empty": 215,
+    "occupied": 112
+  },
+  "test_class_counts": {
+    "empty": 54,
+    "occupied": 28
   },
   "n_estimators": 400,
   "random_state": 42,

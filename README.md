@@ -1,6 +1,6 @@
 # Smart Home Rewired
 
-**Build it. Connect it. Make it smart!**
+**Build it. Connect it. Make it smart.**
 
 Practical DIY smart home projects combining custom hardware, Home Assistant, ESPHome, and AI. Created by Philipp Breuss-Schneeweis, this project brings together software engineering and hands-on making—from CNC milling and 3D printing to camera integration and machine learning.
 
@@ -22,7 +22,7 @@ A custom-built mailbox that connects physical deliveries to your smart home.
 - Interior LED lighting for photographs and an exterior indicator for mail.
 - Home Assistant automations for snapshots and delivery notifications.
 - Camera integration with Frigate, go2rtc, and Apple HomeKit.
-- AI classification to distinguish an empty mailbox from one containing mail, using Histogram of Oriented Gradients (HOG) features and a Random Forest classifier. [<See>](AI%20Package%20Detection/Random%20Forest%20Image%20Classifier) 
+- AI classification to distinguish an empty mailbox from one containing mail, using Histogram of Oriented Gradients (HOG) features and a Random Forest classifier. [<See>](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Random%20Forest%20Image%20Classifier) 
 
 The accompanying YouTube series covers three parts:
 

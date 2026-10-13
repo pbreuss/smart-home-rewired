@@ -340,7 +340,7 @@ In the Smart Mailbox installation that inspired this project, the App runs in Ho
 
 ```text
 Home Assistant
-/addons/image-classifier-rfhog/
+/addons/image_classifier_rfhog/
         │
         │ loads model
         ▼
@@ -422,19 +422,19 @@ Home Assistant
 Copy this repository folder:
 
 ```text
-home-assistant-app/image-classifier-rfhog/
+home-assistant-app/image_classifier_rfhog/
 ```
 
 to Home Assistant:
 
 ```text
-/addons/image-classifier-rfhog/
+/addons/image_classifier_rfhog/
 ```
 
 The result should be:
 
 ```text
-/addons/image-classifier-rfhog/
+/addons/image_classifier_rfhog/
 ├── config.yaml
 ├── Dockerfile
 ├── app.py
@@ -461,7 +461,7 @@ smb://<HOME_ASSISTANT_IP>
 
 3. authenticate with the credentials configured in Samba Share
 4. open the `addons` share
-5. copy the `image-classifier-rfhog` folder into it
+5. copy the `image_classifier_rfhog` folder into it
 
 Example only:
 
@@ -593,7 +593,7 @@ Add a REST command to Home Assistant's `configuration.yaml`:
 ```yaml
 rest_command:
   mailbox_classifier:
-    url: "http://smart-home-rewired_image-classifier-rfhog:8098/classify"
+    url: "http://32878c6d-image_classifier_rfhog:8098/classify"
     method: POST
     content_type: "application/json"
     payload: >
@@ -760,7 +760,7 @@ Reload model
 Check that the directory is exactly:
 
 ```text
-/addons/image-classifier-rfhog/
+/addons/image_classifier_rfhog/
 ```
 
 and contains at least:

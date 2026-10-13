@@ -1,7 +1,7 @@
 name: Image Classifier RFHOG
 description: Local HOG + color Random Forest image classifier that can be used i.e. for mailbox empty/occupied detection.
 version: "0.3.0"
-slug: image-classifier-rfhog
+slug: image_classifier_rfhog
 init: false
 arch:
   - amd64

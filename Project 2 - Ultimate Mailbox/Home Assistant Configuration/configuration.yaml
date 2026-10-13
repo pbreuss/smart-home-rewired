@@ -86,13 +86,24 @@ rest_command:
       }
       
   mailbox_classifier:
-    url: "http://smart-home-rewired_image-classifier-rfhog:8098/classify"
+    url: "http://local-mailbox-classifier:8098/classify"
     method: POST
     content_type: "application/json"
     payload: >
       {
         "image": "{{ image }}"
-      }      
+      }     
+
+  image_classifier_rfhog:
+    url: "http://32878c6d-image_classifier_rfhog:8098/classify"
+    method: POST
+    content_type: "application/json"
+    payload: >
+      {
+        "image": "{{ image }}"
+      }     
+
+
       
 shell_command:
   mailbox_archive: 'cp "{{ source }}" "{{ destination }}"'

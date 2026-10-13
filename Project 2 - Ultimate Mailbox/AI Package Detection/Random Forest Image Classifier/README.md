@@ -15,7 +15,7 @@ The project was built as part of a larger Smart Mailbox system using ESP32-CAM c
 
 ![Smart Mailbox automation](images/mailalgo_final_updated.gif)
 
-This animation shows the flow of two Home Assistant mailbox automations: ‘Door opens’ and ‘Door closes.’ The complete YAML files are available in the [Home Assistant Configuration]("../Home Assistant Configuration/") folder.
+This animation shows the flow of two Home Assistant mailbox automations: ‘Door opens’ and ‘Door closes.’ The complete YAML files are available in the [Home Assistant Configuration](Project 2 - Ultimate Mailbox/Home Assistant Configuration) folder.
 
 ---
 

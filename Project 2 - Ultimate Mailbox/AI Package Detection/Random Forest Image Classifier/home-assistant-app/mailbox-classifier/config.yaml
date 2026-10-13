@@ -1,6 +1,6 @@
-name: Random Forest image classifier
-description: Local HOG + color Random Forest classifier for mailbox empty/occupied detection.
-version: "0.2.0"
+name: Random Forest Image Classifier
+description: Local HOG + color Random Forest classifier that can be used i.e. for mailbox empty/occupied detection.
+version: "0.3.0"
 slug: mailbox_classifier
 init: false
 arch:

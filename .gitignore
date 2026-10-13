@@ -17,6 +17,7 @@ venv/
 .venv/
 env/
 ENV/
+smr_rf_classifier_venv/
 
 # Python packaging
 build/

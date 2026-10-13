@@ -13,7 +13,7 @@ The classifier itself only needs images, a trained model, and a Python runtime. 
 
 The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. 
 
-![Smart Mailbox automation](images/mailalgo_final_updated.gif)
+![Smart Mailbox automation](home_assistant_apps/image_classifier_rfhog_ha_app/images/mail_automations_status_flow.gif)
 
 This animation shows the flow of two Home Assistant mailbox automations: ‘Door opens’ and ‘Door closes.’ The complete YAML files are available in the [Home Assistant Configuration](../../Home%20Assistant%20Configuration/) folder.
 

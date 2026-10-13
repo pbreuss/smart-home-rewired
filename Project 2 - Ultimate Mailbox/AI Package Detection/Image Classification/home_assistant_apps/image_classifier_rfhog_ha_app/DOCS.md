@@ -1,4 +1,4 @@
-# Mailbox Classifier 0.3.0 Docs
+# Image Classifier RFHOG Docs
 
 A small local Home Assistant App that compares a current image with a stored reference image.
 

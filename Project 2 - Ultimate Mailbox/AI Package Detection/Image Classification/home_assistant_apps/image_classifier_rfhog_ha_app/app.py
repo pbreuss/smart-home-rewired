@@ -27,7 +27,7 @@ HOG_CELLS_PER_BLOCK = (2, 2)
 def load_options():
     defaults = {
         "model_path": "/media/frigate/data/mailbox_rf.joblib",
-        "default_image": "media/frigate/reference_image/ref_image.jpg",
+        "default_image": "/media/frigate/reference_image/ref_image.jpg",
     }
     try:
         with open(OPTIONS_PATH, "r", encoding="utf-8") as f:

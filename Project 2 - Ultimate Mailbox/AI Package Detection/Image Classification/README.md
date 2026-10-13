@@ -110,8 +110,7 @@ The important separation is:
 
 - `training/` contains the training pipeline
 - DATASET_DIR contains labeled training images (to be setup in the training script)
-- `models/` contains trained model
-- `home-assistant-app/image_classifier_rfhog_ha_app/` contains the runtime service used inside Home Assistant
+- `home-assistant-apps/image_classifier_rfhog_ha_app/` contains the runtime service used inside Home Assistant
 
 ---
 
@@ -134,7 +133,7 @@ For training:
 For Home Assistant deployment:
 
 - Home Assistant OS or another installation that supports local Apps/add-ons
-- the App files from `home-assistant-app/mailbox-classifier/`
+- the App files from `home-assistant-apps/image_classifier_rfhog_ha_app/`
 
 Optional:
 
@@ -151,7 +150,7 @@ Clone the repository:
 
 ```bash
 git clone <YOUR-REPOSITORY-URL>
-cd mailbox-classifier-hog
+cd smart-home-rewired/Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification
 ```
 
 Create and activate a virtual environment:
@@ -341,7 +340,7 @@ In the Smart Mailbox installation that inspired this project, the App runs in Ho
 
 ```text
 Home Assistant
-/addons/mailbox-classifier/
+/addons/image-classifier-rfhog/
         │
         │ loads model
         ▼
@@ -423,19 +422,19 @@ Home Assistant
 Copy this repository folder:
 
 ```text
-home-assistant-app/mailbox-classifier/
+home-assistant-app/image-classifier-rfhog/
 ```
 
 to Home Assistant:
 
 ```text
-/addons/mailbox-classifier/
+/addons/image-classifier-rfhog/
 ```
 
 The result should be:
 
 ```text
-/addons/mailbox-classifier/
+/addons/image-classifier-rfhog/
 ├── config.yaml
 ├── Dockerfile
 ├── app.py
@@ -462,7 +461,7 @@ smb://<HOME_ASSISTANT_IP>
 
 3. authenticate with the credentials configured in Samba Share
 4. open the `addons` share
-5. copy the `mailbox-classifier` folder into it
+5. copy the `image-classifier-rfhog` folder into it
 
 Example only:
 
@@ -761,7 +760,7 @@ Reload model
 Check that the directory is exactly:
 
 ```text
-/addons/mailbox-classifier/
+/addons/image-classifier-rfhog/
 ```
 
 and contains at least:

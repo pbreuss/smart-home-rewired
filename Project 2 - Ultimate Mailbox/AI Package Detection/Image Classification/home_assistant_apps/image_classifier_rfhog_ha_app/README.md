@@ -1,4 +1,4 @@
-# Mailbox Classifier README
+# Image Classifier RFHOG README
 
 Home Assistant App for local reference-image comparison.
 

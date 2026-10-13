@@ -1,4 +1,5 @@
-alias: Paketbox / Briefschlitz - Foto Benachrichtigung
+# This is the main automation
+alias: Mailbox / Mailslot - Photo notification / Indicator light
 description: ''
 triggers:
   - trigger: state
@@ -11,34 +12,35 @@ actions:
   - variables:
       timestamp: '{{ now().strftime(''%Y%m%d_%H%M%S'') }}'
       current_image: /media/frigate/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg
-  - action: switch.turn_on
+  - action: switch.turn_on # Turn on the light inside the mailbox.
     target:
       entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
   - delay:
-      milliseconds: 3000
-  - action: camera.snapshot
+      milliseconds: 3000 # Wait for 3 seconds such that the cam gets used to the light
+  - action: camera.snapshot # Take the snapshot
     target:
       entity_id: camera.esp32cam_mailbox_postbox_kamera
     data:
       filename: '{{ current_image }}'
   - delay:
-      milliseconds: 1000
-  - action: rest_command.mailbox_classifier
+      milliseconds: 1000 # Wait another second
+  - action: rest_command.mailbox_classifier # send the image to the mailbox classifier
     data:
       image: '{{ current_image }}'
     response_variable: classifier_result
-  - variables:
+  - variables:  # these are the return variables
       rf_prediction: '{{ classifier_result.content.prediction }}'
       rf_occupied_probability: '{{ classifier_result.content.occupied_probability | float }}'
       rf_occupied_percent: >-
         {{ (classifier_result.content.occupied_probability | float * 100) |
         round(1) }}
+  # use this part if you have the mailbox classifier installed
   - choose:
       - conditions:
           - condition: template
             value_template: '{{ rf_prediction == ''empty'' }}'
         sequence:
-          - action: shell_command.mailbox_archive
+          - action: shell_command.mailbox_archive # save the image in the empty folder
             data:
               source: '{{ current_image }}'
               destination: >-
@@ -48,7 +50,7 @@ actions:
             target:
               entity_id: light.esp32cam_garagenvorplatz_mailbox_camera_led
     default:
-      - action: shell_command.mailbox_archive
+      - action: shell_command.mailbox_archive # save the image in occupied
         data:
           source: '{{ current_image }}'
           destination: >-

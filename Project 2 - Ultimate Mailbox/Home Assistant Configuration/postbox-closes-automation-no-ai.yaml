@@ -1,0 +1,45 @@
+alias: Mailbox - Photo notification when door closes
+description: "Send a photo whenever the mailbox door closes."
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.esp32cam_mailbox_postbox_tur
+    from: "on"
+    to: "off"
+
+actions:
+  - variables:
+      timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
+      current_image: "/media/frigate/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
+
+  # Turn on the light inside the mailbox.
+  - action: switch.turn_on
+    target:
+      entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
+
+  # Give the camera time to adjust to the light.
+  - delay:
+      seconds: 3
+
+  # Save a photo. The destination folder must already exist.
+  - action: camera.snapshot
+    continue_on_error: true
+    target:
+      entity_id: camera.esp32cam_mailbox_postbox_kamera
+    data:
+      filename: "{{ current_image }}"
+
+  # Turn off the interior light, even if taking the photo failed.
+  - action: switch.turn_off
+    target:
+      entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
+
+  # Send the notification with the photo.
+  - action: notify.mobile_app_philipps_iphone_15
+    data:
+      title: "📬 Mailbox door closed"
+      message: "The mailbox door was closed. Check the photo to see what's inside."
+      data:
+        image: "/media/local/frigate/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
+
+mode: queued
+max: 5

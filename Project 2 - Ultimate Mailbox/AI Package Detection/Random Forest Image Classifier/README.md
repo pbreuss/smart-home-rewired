@@ -3,22 +3,25 @@ by Smart Home Rewired, Oct 2026
 
 A lightweight, fully local image-classification Home Assistant App, that can be used to classify images.
 
-In this sample use case it is used to evaluate if a smart mailbox is **empty** or **occupied**.
+In this sample use case the classifier is used to evaluate images taken inside a mailbox, to determine if the mailbox contains mail.
 
 The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier**. 
 
-Training and evaluation is done in a Jupyter notebook (see training/random_forest_training.ipynb), and the trained model can be deployed as a local **Home Assistant App** and called directly from Home Assistant automations.
+Training and evaluation is done in a Jupyter notebook (see [training/random_forest_training.ipynb](training/random_forest_training.ipynb)), and the trained model can be deployed as a local **Home Assistant App** and called directly from Home Assistant automations.
 
-The classifier itself only needs images, a trained model, and a Python runtime.
+The classifier itself only needs images, a trained model, and a Python runtime. Instructions how to install and use this classifier with Home Assistant are below.
 
 The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. 
 
 ![Smart Mailbox automation](images/mailalgo_final_updated.gif)
+
+This animation shows the flow of two Home Assistant mailbox automations: ‘Door opens’ and ‘Door closes.’ The complete YAML files are available in the [Home Assistant Configuration](../Home Assistant Configuration/) folder.
+
 ---
 
 ## What it does
 
-A camera mounted inside the mailbox captures an image whenever mail may have been delivered. The classifier predicts one of two classes:
+A camera mounted inside the mailbox captures an image whenever mail may have been delivered (triggered by the mailbox door being closed). The classifier predicts one of two classes:
 
 - `empty`
 - `occupied`
@@ -73,24 +76,25 @@ This makes traditional computer-vision features a good fit.
 
 The **Random Forest** combines those features to distinguish an empty mailbox from letters, newspapers, parcels, and other objects.
 
-This approach is lightweight, fast, fully local, and does not require cloud inference or a GPU.
+This approach is lightweight, fast, fully local, and does not require cloud inference or a GPU or lots of RAM.
 
 ---
 
 # Repository structure
 
 ```text
-mailbox-classifier-hog/
+smart-home-rewired / Project 2 - Ultimate Mailbox/AI Package Detection / Random Forest Image Classifier/
+│
+├── images/
+│   └── mailalgo_final_updated.gif # animated gif to show flow of sample use case
 │
 ├── training/
-│   └── mailbox_random_forest_training.ipynb
-│
-├── data/
-│   ├── empty/
-│   └── occupied/
+│   └── mailbox_random_forest_training.ipynb # use this script to train your model based on your own images
+│   └── requirements-training.txt # use this environment for training
 │
 ├── models/
 │   └── mailbox_rf.joblib        # created after training; usually not committed
+│   └── mailbox_rf_metadata.json # auto generated, based on the last training run
 │
 ├── home-assistant-app/
 │   └── mailbox-classifier/
@@ -100,16 +104,14 @@ mailbox-classifier-hog/
 │       ├── run.sh
 │       └── requirements.txt
 │
-├── requirements.txt
-├── .gitignore
 └── README.md
 ```
 
 The important separation is:
 
 - `training/` contains the training pipeline
-- `data/` contains labeled training images
-- `models/` contains trained model artifacts
+- DATASET_DIR contains labeled training images (to be setup in the training script)
+- `models/` contains trained model
 - `home-assistant-app/` contains the runtime service used inside Home Assistant
 
 ---
@@ -121,7 +123,7 @@ The important separation is:
 For training:
 
 - Python 3
-- Jupyter Notebook or JupyterLab
+- Visual Studio Code or Jupyter Notebook or JupyterLab
 - NumPy
 - Pillow
 - scikit-image
@@ -219,7 +221,7 @@ Try to keep both classes reasonably balanced.
 Training is performed in:
 
 ```text
-train/mailbox_random_forest_training.ipynb
+training/random_forest_training.ipynb
 ```
 
 Start Jupyter from the repository root:
@@ -872,9 +874,15 @@ Possible extensions include:
 
 # License
 
-Add the license that best fits your project, for example MIT.
+The original code and configuration files in this repository are
+licensed under the [MIT License](LICENSE).
 
-If you choose MIT, include a `LICENSE` file in the repository.
+You are welcome to use, modify, and share them for your own projects,
+including commercial projects. Please retain the copyright and
+license notice.
+
+The software is provided without warranty. Third-party software,
+logos, and other assets remain subject to their respective licenses.
 
 ---
 

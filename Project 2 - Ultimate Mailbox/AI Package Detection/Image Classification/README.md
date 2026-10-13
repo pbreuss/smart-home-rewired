@@ -594,7 +594,7 @@ Add a REST command to Home Assistant's `configuration.yaml`:
 ```yaml
 rest_command:
   mailbox_classifier:
-    url: "http://local-mailbox-classifier:8098/classify"
+    url: "http://smart-home-rewired_image-classifier-rfhog:8098/classify"
     method: POST
     content_type: "application/json"
     payload: >

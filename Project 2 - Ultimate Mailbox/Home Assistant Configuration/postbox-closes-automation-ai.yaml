@@ -11,7 +11,7 @@ triggers:
 actions:
   - variables:
       timestamp: '{{ now().strftime(''%Y%m%d_%H%M%S'') }}'
-      current_image: /media/frigate/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg
+      current_image: /media/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg
   - action: switch.turn_on # Turn on the light inside the mailbox.
     target:
       entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
@@ -44,7 +44,7 @@ actions:
             data:
               source: '{{ current_image }}'
               destination: >-
-                /media/frigate/mailbox_dataset/empty/mailbox_{{ timestamp
+                /media/mailbox_dataset/empty/mailbox_{{ timestamp
                 }}_RF-{{ rf_occupied_percent }}.jpg
           - action: light.turn_off
             target:
@@ -54,7 +54,7 @@ actions:
         data:
           source: '{{ current_image }}'
           destination: >-
-            /media/frigate/mailbox_dataset/occupied/mailbox_{{ timestamp
+            /media/mailbox_dataset/occupied/mailbox_{{ timestamp
             }}_RF-{{ rf_occupied_percent }}.jpg
       - action: notify.mobile_app_philipps_iphone_15
         data:
@@ -70,7 +70,7 @@ actions:
             occupied
           data:
             image: >-
-              /media/local/frigate/mailbox_dataset/current/mailbox_{{ timestamp
+              /media/mailbox_dataset/current/mailbox_{{ timestamp
               }}.jpg
       - action: light.turn_on
         target:

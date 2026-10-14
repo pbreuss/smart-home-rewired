@@ -134,7 +134,7 @@ def index():
     options = load_options()
     return f"""
     <html><body style="font-family:sans-serif;max-width:760px;margin:2rem auto;line-height:1.5">
-      <h2>Mailbox Classifier</h2>
+      <h2>Image Classifier RFHOG</h2>
       <p><b>Classifier:</b> HOG + Color Random Forest</p>
       <p><b>Status:</b> {"model loaded" if model is not None else "model not found"}</p>
       <p><b>Model:</b> {model_path}</p>
@@ -142,6 +142,10 @@ def index():
       <p>POST JSON to <code>/classify</code> with
       <code>{{"image":"/media/current_mailbox.jpg"}}</code>.</p>
       <p>Health: <code>/health</code> &nbsp; Reload model: <code>POST /reload</code></p>
+      <p>For a quick test, go to Home Assistant --> Settings --> Tools --> Actions --> YAML Mode --> 
+       <code>action: rest_command.image_classifier_rfhog<code>
+       --> and click Perform action.
+      </p>
     </body></html>
     """
 

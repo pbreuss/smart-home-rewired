@@ -59,7 +59,7 @@ Mailbox door / mail slot closes
      Turn mailbox LED off
               │
               ▼
-      Mailbox Classifier App
+      Image Classifier RFHOG App
               │
               ▼
        HOG + color features
@@ -338,7 +338,7 @@ Store the model in the App's persistent `/data` directory:
 ```text
 Home Assistant
 │
-├── Mailbox Classifier App
+├── Image Classifier RFHOG App
 └── /data/mailbox_rfhog.joblib
 ```
 
@@ -621,7 +621,7 @@ Add a REST command to Home Assistant's `configuration.yaml`:
 ```yaml
 rest_command:
   image_classifier_rfhog:
-    url: "http://32878c6d-image_classifier_rfhog:8098/classify"
+    url: "http://32878c6d-image-classifier-rfhog:8098/classify"
     method: POST
     content_type: "application/json"
     payload: >
@@ -757,7 +757,7 @@ Home Assistant sees the same file as:
 /media/frigate/mailbox_rfhog.joblib
 ```
 
-Then either restart the Mailbox Classifier App or call:
+Then either restart the Image Classifier RFHOG App or call:
 
 ```text
 POST /reload

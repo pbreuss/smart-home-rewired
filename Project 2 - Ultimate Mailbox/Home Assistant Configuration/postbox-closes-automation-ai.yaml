@@ -24,7 +24,7 @@ actions:
       filename: '{{ current_image }}'
   - delay:
       milliseconds: 1000 # Wait another second
-  - action: rest_command.mailbox_classifier # send the image to the mailbox classifier
+  - action: rest_command.mailbox_classifier # send the image to the Image Classifier RFHOG
     data:
       image: '{{ current_image }}'
     response_variable: classifier_result
@@ -34,7 +34,7 @@ actions:
       rf_occupied_percent: >-
         {{ (classifier_result.content.occupied_probability | float * 100) |
         round(1) }}
-  # use this part if you have the mailbox classifier installed
+  # use this part if you have the Image Classifier RFHOG installed
   - choose:
       - conditions:
           - condition: template

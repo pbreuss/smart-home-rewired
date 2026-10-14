@@ -55,7 +55,7 @@ Mailbox door / mail slot closes
      Turn mailbox LED off
               │
               ▼
-      Mailbox Classifier App
+      Image Classifier RFHOG App
               │
               ▼
        HOG + color features

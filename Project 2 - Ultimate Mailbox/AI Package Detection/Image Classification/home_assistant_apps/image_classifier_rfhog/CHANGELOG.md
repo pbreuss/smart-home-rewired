@@ -8,3 +8,6 @@
 
 ## 0.3.0
 - added documentation
+
+## 0.4.0
+- fixed documentation

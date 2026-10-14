@@ -26,7 +26,7 @@ HOG_CELLS_PER_BLOCK = (2, 2)
 
 def load_options():
     defaults = {
-        "model_path": "/media/frigate/data/mailbox_rf.joblib",
+        "model_path": "/media/frigate/data/mailbox_rfhog.joblib",
         "default_image": "/media/frigate/reference_image/ref_image.jpg",
     }
     try:
@@ -185,7 +185,7 @@ def classify():
             "ok": False,
             "error": "model_not_found",
             "model_path": model_path,
-            "hint": "Train with the included notebook and copy mailbox_rf.joblib to /data/mailbox_rf.joblib."
+            "hint": "Train with the included notebook and copy mailbox_rfhog.joblib to /data/mailbox_rfhog.joblib."
         }), 503
 
     try:

@@ -11,9 +11,9 @@ Training and evaluation is done in a Jupyter notebook (see [training/image_class
 
 The classifier itself only needs images, a trained model, and a Python runtime. Instructions how to install and use this classifier with Home Assistant are below.
 
-The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. 
+The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. (see ▶️ [see the Youtube Series "Ultimate Smart Mailbox" part 1, 2, 3](https://www.youtube.com/channel/UChWTRp5MhretkMP-LKyA5-A))
 
-![Smart Mailbox automation](home_assistant_apps/image_classifier_rfhog_ha_app/images/mail_automations_status_flow.gif)
+![Smart Mailbox automation](home_assistant_apps/image_classifier_rfhog/images/mail_automations_status_flow.gif)
 
 This animation shows the flow of two Home Assistant mailbox automations: ‘Door opens’ and ‘Door closes.’ The complete YAML files are available in the [Home Assistant Configuration](../../Home%20Assistant%20Configuration/) folder.
 
@@ -34,13 +34,29 @@ When deployed in Home Assistant, the result can be used to:
 - trigger another automation
 - archive images for future retraining
 
-Typical flow:
+Typical flow Automation "Mail door opens":
+
+```text
+Mailbox door / mail slot opens
+              │
+              ▼
+     Turn mailbox LED on
+```
+
+
+Typical flow Automation "Mail door closes":
 
 ```text
 Mailbox door / mail slot closes
               │
               ▼
+     Turn mailbox LED on
+              │
+              ▼
      Home Assistant snapshot
+              │
+              ▼
+     Turn mailbox LED off
               │
               ▼
       Mailbox Classifier App
@@ -90,18 +106,18 @@ smart-home-rewired / Project 2 - Ultimate Mailbox/AI Package Detection / Image C
 │   └── requirements-training.txt # use this environment for training
 │
 ├── models/
-│   └── mailbox_rf.joblib        # created after training; usually not committed
-│   └── mailbox_rf_metadata.json # auto generated, based on the last training run
+│   └── mailbox_rfhog.joblib        # created after training
+│   └── mailbox_rfhog_metadata.json # auto generated, based on the last training run
 │
 ├── home-assistant-apps/
-│   └── image_classifier_rfhog_ha_app/
+│   └── image_classifier_rfhog/   # this is the app to be installed in Home Assistant
 │       ├── config.yaml
 │       ├── Dockerfile
 │       ├── app.py
 │       ├── run.sh
 │       └── requirements.txt
 │       ├── images/
-│       │   └── mailalgo_final_updated.gif # animated gif to show flow of sample use case
+│       │   └── mailalgo_final_updated.gif # animated gif to show flow within automations for sample use case
 │
 └── README.md
 ```
@@ -110,7 +126,7 @@ The important separation is:
 
 - `training/` contains the training pipeline
 - DATASET_DIR contains labeled training images (to be setup in the training script)
-- `home-assistant-apps/image_classifier_rfhog_ha_app/` contains the runtime service used inside Home Assistant
+- `home-assistant-apps/image_classifier_rfhog/` contains the runtime service used inside Home Assistant
 
 ---
 
@@ -133,13 +149,13 @@ For training:
 For Home Assistant deployment:
 
 - Home Assistant OS or another installation that supports local Apps/add-ons
-- the App files from `home-assistant-apps/image_classifier_rfhog_ha_app/`
+- the App files from `home-assistant-apps/image_classifier_rfhog/`
 
 Optional:
 
-- Home Assistant Samba Share for convenient file access
+- Home Assistant Samba Share for convenient file access - see Home Assistant --> Apps --> Install "Samba Share"
 - NAS/network storage
-- Frigate
+- Frigate # used to stabilize video stream - only needed for Apple Homekit integration in this project
 - ESP32-CAM or another camera source
 
 ---
@@ -149,8 +165,8 @@ Optional:
 Clone the repository:
 
 ```bash
-git clone <YOUR-REPOSITORY-URL>
-cd smart-home-rewired/Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification
+git clone https://github.com/pbreuss/smart-home-rewired.git
+cd smart-home-rewired/Project\ 2\ -\ Ultimate\ Mailbox/AI\ Package\ Detection/Image\ Classification/
 ```
 
 Create and activate a virtual environment:
@@ -170,6 +186,9 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+
+cd training/image_classifier_rfhog_training
+pip install -r requirements-training.txt
 ```
 
 The virtual environment itself should not be committed to Git.
@@ -181,7 +200,7 @@ The virtual environment itself should not be committed to Git.
 Place training images into two class folders:
 
 ```text
-data/
+mailbox_dataset/
 ├── empty/
 │   ├── empty_001.jpg
 │   ├── empty_002.jpg
@@ -219,7 +238,7 @@ Try to keep both classes reasonably balanced.
 Training is performed in:
 
 ```text
-training/random_forest_training.ipynb
+training/image_classifier_rfhog_training/image_classifier_rfhog_training.ipynb
 ```
 
 Start Jupyter from the repository root:
@@ -231,7 +250,7 @@ jupyter notebook
 Open:
 
 ```text
-train/mailbox_random_forest_training.ipynb
+train/image_classifier_rfhog_training/image_classifier_rfhog_training.ipynb
 ```
 
 and run the cells in sequence.
@@ -291,13 +310,13 @@ If you change feature extraction during training, make the same change in the Ho
 After training, the notebook creates:
 
 ```text
-mailbox_rf.joblib
+mailbox_rfhog.joblib
 ```
 
 For local development, place it in:
 
 ```text
-models/mailbox_rf.joblib
+models/mailbox_rfhog.joblib
 ```
 
 The `.joblib` file contains the trained Random Forest model used for inference.
@@ -320,14 +339,14 @@ Store the model in the App's persistent `/data` directory:
 Home Assistant
 │
 ├── Mailbox Classifier App
-└── /data/mailbox_rf.joblib
+└── /data/mailbox_rfhog.joblib
 ```
 
-Use:
+Use (inside config.yaml):
 
 ```yaml
 options:
-  model_path: "/data/mailbox_rf.joblib"
+  model_path: "/data/mailbox_rfhog.joblib"
 ```
 
 This is the simplest setup and does not require a NAS.
@@ -339,19 +358,8 @@ This is the simplest setup and does not require a NAS.
 In the Smart Mailbox installation that inspired this project, the App runs in Home Assistant while the trained model lives on a Synology NAS:
 
 ```text
-Home Assistant
-/addons/image_classifier_rfhog/
-        │
-        │ loads model
-        ▼
-/media/frigate/mailbox_rf.joblib
-        │
-        │ network storage
-        ▼
-Synology NAS
+The Image Classifier RFHOG App loads /media/frigate/mailbox_rfhog.joblib. In this example, /media/frigate is backed by a mounted Synology NAS share.
 ```
-
-This architecture keeps two concerns separate:
 
 ### Application code
 
@@ -392,46 +400,59 @@ Home Assistant network storage
 The trained model is then available to the App as:
 
 ```text
-/media/frigate/mailbox_rf.joblib
+/media/frigate/mailbox_rfhog.joblib
 ```
 
 On a Mac where the same NAS share is mounted, the file might appear as:
 
 ```text
-/Volumes/frigate/mailbox_rf.joblib
+/Volumes/frigate/mailbox_rfhog.joblib
 ```
 
 These are simply two views of the same file:
 
 ```text
 macOS
-/Volumes/frigate/mailbox_rf.joblib
+/Volumes/frigate/mailbox_rfhog.joblib
               │
               │ same NAS file
               ▼
 Home Assistant
-/media/frigate/mailbox_rf.joblib
+/media/frigate/mailbox_rfhog.joblib
 ```
 
 `/Volumes/frigate` is only an example macOS mount point. It is not required by the project.
 
 ---
 
-# 8. Install the local Home Assistant App
+# 8. Install the Home Assistant App
 
-Copy this repository folder:
+Choose one of the following installation methods.
+
+## Option A — Install using the repository URL (recommended)
+
+1. In Home Assistant, go to **Settings → Apps → Install App**.
+2. Open the **⋮ menu → Repositories**.
+3. Add this repository URL:
+
+   ```text
+   https://github.com/pbreuss/smart-home-rewired
+   ```
+
+4. Close the repository dialog and refresh the App store if necessary.
+5. Find **Image Classifier RFHOG** under **Smart Home Rewired** and click **Install**.
+
+Use the repository’s root URL, rather than a link to an individual App folder. This method lets Home Assistant offer updates when new App versions are published.
+
+## Option B — Install manually as a local App
+
+Download or clone the repository. Inside the **Image Classification** directory, copy this complete folder:
 
 ```text
-home-assistant-app/image_classifier_rfhog/
+home_assistant_apps/image_classifier_rfhog_ha_app/
 ```
 
-to Home Assistant:
-
-```text
-/addons/image_classifier_rfhog/
-```
-
-The result should be:
+Place it in Home Assistant’s local `/addons/` directory. You can rename the copied folder to `image_classifier_rfhog`:
 
 ```text
 /addons/image_classifier_rfhog/
@@ -439,10 +460,32 @@ The result should be:
 ├── Dockerfile
 ├── app.py
 ├── run.sh
-└── requirements.txt
+├── requirements.txt
+└── ...
 ```
 
-Do not copy only `app.py`. Home Assistant needs the complete directory in order to build and run the App.
+You can copy the folder using the **Samba Share** App.
+
+Do not copy only `app.py`. Home Assistant needs the complete directory to build and run the App.
+
+After copying:
+
+1. Go to **Settings → Apps → Install App**.
+2. Select **Check for updates** from the **⋮ menu**.
+3. Find **Image Classifier RFHOG** under **Local apps** and click **Install**.
+
+For future updates, replace the local source files and rebuild the App.
+
+## After installation
+
+Configure the model and image paths in the App’s **Configuration** tab, then start the App.
+
+The internal hostname depends on your installation method. With `slug: image-classifier-rfhog`, use:
+
+- **Repository installation:** `http://32878c6d-image-classifier-rfhog:8098/classify`
+- **Manual local installation:** `http://local-image-classifier-rfhog:8098/classify`
+
+Use the corresponding URL in your Home Assistant REST command - when editing configuration.yaml.
 
 ---
 
@@ -479,11 +522,11 @@ For a model stored on NAS/network storage:
 
 ```yaml
 options:
-  model_path: "/media/frigate/mailbox_rf.joblib"
+  model_path: "/media/frigate/mailbox_rfhog.joblib"
   default_image: "/media/current_mailbox.jpg"
 ```
 
-The App also needs access to Home Assistant's media directory:
+The App also needs access to Home Assistant's media directory (so this setting needs to be in config.yaml):
 
 ```yaml
 map:
@@ -494,37 +537,22 @@ For the simple `/data` deployment:
 
 ```yaml
 options:
-  model_path: "/data/mailbox_rf.joblib"
+  model_path: "/data/mailbox_rfhog.joblib"
   default_image: "/media/current_mailbox.jpg"
 ```
 
 ---
 
-# 10. Install and start the App
+# 10. Verify the classifier
 
-After copying the App directory:
-
-1. open Home Assistant
-2. go to **Settings → Apps → App Store**
-3. reload or refresh the App Store
-4. find **Mailbox Classifier**
-5. install it
-6. start it
-
-The first build may take a little longer because Python packages such as NumPy, scikit-learn, and scikit-image must be installed.
-
----
-
-# 11. Verify the classifier
-
-Open the Mailbox Classifier App.
+Open the Image Classifier RFHOG App in Home Assistant.
 
 The status page should report that the model was loaded successfully.
 
 For example:
 
 ```text
-Model: /media/frigate/mailbox_rf.joblib
+Model: /media/frigate/mailbox_rfhog.joblib
 Status: model loaded
 ```
 
@@ -541,13 +569,13 @@ A successful response looks similar to:
   "ok": true,
   "classifier": "hog_color_random_forest",
   "model_loaded": true,
-  "model_path": "/media/frigate/mailbox_rf.joblib"
+  "model_path": "/media/frigate/mailbox_rfhog.joblib"
 }
 ```
 
 ---
 
-# 12. Classifier API
+# 11. Classifier API
 
 The main endpoint is:
 
@@ -586,13 +614,13 @@ POST /reload
 
 ---
 
-# 13. Connect the App to Home Assistant
+# 12. Connect the App to Home Assistant
 
 Add a REST command to Home Assistant's `configuration.yaml`:
 
 ```yaml
 rest_command:
-  mailbox_classifier:
+  image_classifier_rfhog:
     url: "http://32878c6d-image_classifier_rfhog:8098/classify"
     method: POST
     content_type: "application/json"
@@ -600,17 +628,17 @@ rest_command:
       {
         "image": "{{ image }}"
       }
-```
+``` 
 
 If `configuration.yaml` already contains a `rest_command:` section, add `mailbox_classifier:` below the existing commands instead of creating a second `rest_command:` section.
 
 Restart Home Assistant after changing `configuration.yaml`.
 
-> Depending on how the local App is named in your Home Assistant installation, the internal hostname may differ. If the request cannot connect, check the App hostname/network information and use that hostname instead.
+> Depending on how the local App is named in your Home Assistant installation, the internal hostname may differ. If the request cannot connect, check the App hostname/network information and use that hostname instead. See "After installation".
 
 ---
 
-# 14. Call the classifier from an automation
+# 13. Call the classifier from an automation
 
 Take a snapshot first:
 
@@ -626,7 +654,7 @@ Take a snapshot first:
     filename: "{{ current_image }}"
 ```
 
-Then classify the exact same image:
+Then classify this image:
 
 ```yaml
 - action: rest_command.mailbox_classifier
@@ -676,7 +704,7 @@ Example:
 
 ---
 
-# 15. Archive classified images
+# 14. Archive classified images
 
 Keeping classified images is useful because they become new training data.
 
@@ -711,7 +739,7 @@ Deploy improved model
 
 ---
 
-# 16. Updating the model after retraining
+# 15. Updating the model after retraining
 
 One of the main benefits of this architecture is that retraining does not require rebuilding the App.
 
@@ -720,13 +748,13 @@ Train a new model and replace the existing `.joblib`.
 For example, on a Mac with the NAS mounted:
 
 ```text
-/Volumes/frigate/mailbox_rf.joblib
+/Volumes/frigate/mailbox_rfhog.joblib
 ```
 
 Home Assistant sees the same file as:
 
 ```text
-/media/frigate/mailbox_rf.joblib
+/media/frigate/mailbox_rfhog.joblib
 ```
 
 Then either restart the Mailbox Classifier App or call:
@@ -746,14 +774,14 @@ Rebuild/update Home Assistant App
 
 Retrain Random Forest
         ↓
-Replace mailbox_rf.joblib
+Replace mailbox_rfhog.joblib
         ↓
 Reload model
 ```
 
 ---
 
-# 17. Troubleshooting
+# 16. Troubleshooting
 
 ## App does not appear in Home Assistant
 
@@ -782,13 +810,13 @@ Then reload the App Store.
 Check the configured model path:
 
 ```yaml
-model_path: "/media/frigate/mailbox_rf.joblib"
+model_path: "/media/frigate/mailbox_rfhog.joblib"
 ```
 
 or:
 
 ```yaml
-model_path: "/data/mailbox_rf.joblib"
+model_path: "/data/mailbox_rfhog.joblib"
 ```
 
 Then call:
@@ -843,7 +871,7 @@ The safest approach is to keep the training and inference `extract_features()` i
 
 ---
 
-# 18. Security and privacy
+# 17. Security and privacy
 
 All classification can run locally.
 
@@ -853,7 +881,7 @@ Depending on your Home Assistant setup, images, model files, and predictions can
 
 ---
 
-# 19. Ideas for further development
+# 18. Ideas for further development
 
 Possible extensions include:
 

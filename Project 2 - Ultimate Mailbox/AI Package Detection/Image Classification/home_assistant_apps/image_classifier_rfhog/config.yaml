@@ -14,7 +14,7 @@ panel_icon: mdi:mailbox
 map:
   - media:rw
 options:
-  model_path: "/data/mailbox_rf.joblib"
+  model_path: "/data/mailbox_rfhog.joblib"
   default_image: "/media/current_mailbox.jpg"
 schema:
   model_path: str

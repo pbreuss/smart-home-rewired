@@ -452,7 +452,7 @@ Download or clone the repository. Inside the **Image Classification** directory,
 home_assistant_apps/image_classifier_rfhog_ha_app/
 ```
 
-Place it in Home Assistant’s local `/addons/` directory. You can rename the copied folder to `image_classifier_rfhog`:
+Place it in Home Assistant’s local `/addons/` directory.
 
 ```text
 /addons/image_classifier_rfhog/

@@ -13,8 +13,6 @@ The classifier itself only needs images, a trained model, and a Python runtime. 
 
 The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. (see ▶️ [see the Youtube Series "Ultimate Smart Mailbox" part 1, 2, 3](https://www.youtube.com/channel/UChWTRp5MhretkMP-LKyA5-A))
 
-![Smart Mailbox automation](images/mail_automations_status_flow.gif)
-
 ---
 
 ## What it does

@@ -24,7 +24,7 @@ actions:
       filename: '{{ current_image }}'
   - delay:
       milliseconds: 1000 # Wait another second
-  - action: rest_command.mailbox_classifier # send the image to the Image Classifier RFHOG
+  - action: rest_command.image_classifier_rfhog # send the image to the Image Classifier RFHOG
     data:
       image: '{{ current_image }}'
     response_variable: classifier_result

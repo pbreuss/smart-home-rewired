@@ -630,7 +630,7 @@ rest_command:
       }
 ``` 
 
-If `configuration.yaml` already contains a `rest_command:` section, add `mailbox_classifier:` below the existing commands instead of creating a second `rest_command:` section.
+If `configuration.yaml` already contains a `rest_command:` section, add `image_classifier_rfhog:` below the existing commands instead of creating a second `rest_command:` section.
 
 Restart Home Assistant after changing `configuration.yaml`.
 
@@ -657,7 +657,7 @@ Take a snapshot first:
 Then classify this image:
 
 ```yaml
-- action: rest_command.mailbox_classifier
+- action: rest_command.image_classifier_rfhog
   data:
     image: "{{ current_image }}"
   response_variable: classifier_result

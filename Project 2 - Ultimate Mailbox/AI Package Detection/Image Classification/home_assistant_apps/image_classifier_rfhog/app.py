@@ -142,8 +142,8 @@ def index():
       <p>POST JSON to <code>/classify</code> with
       <code>{{"image":"/media/current_mailbox.jpg"}}</code>.</p>
       <p>Health: <code>/health</code> &nbsp; Reload model: <code>POST /reload</code></p>
-      <p>For a quick test, go to Home Assistant --> Settings --> Tools --> Actions --> YAML Mode --> 
-       <code>action: rest_command.image_classifier_rfhog<code>
+      <p>For a quick test, go to Home Assistant --> Settings --> Tools --> Actions --> YAML Mode --> choose the action image_classifier_rfhog -->
+       <code>action: rest_command.image_classifier_rfhog</code>
        --> and click Perform action.
       </p>
     </body></html>

@@ -1,6 +1,7 @@
 name: Image Classifier RFHOG by Smart Home Rewired
-description: Local HOG + color Random Forest image classifier that can be used i.e. for mailbox empty/occupied detection.
-version: "0.7.0"
+description: Classify images locally with your own trained AI model and use the results in Home Assistant automations.
+url: https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Image%20Classification
+version: "0.7.1"
 slug: image_classifier_rfhog
 init: false
 arch:
@@ -10,7 +11,7 @@ startup: services
 boot: auto
 ingress: true
 ingress_port: 8098
-panel_icon: mdi:mailbox
+panel_icon: mdi:image-check-outline
 map:
   - media:rw
 options:

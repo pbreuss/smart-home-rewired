@@ -3,6 +3,8 @@ by Smart Home Rewired, Oct 2026
 
 **A lightweight, fully local image-classification Home Assistant App, that can be used to classify images from within an automation.**
 
+---
+
 ## How it works
 
 The github linked above contains instructions and a training ipynb file, that can be used to train your own classifier model based on your own images.
@@ -17,6 +19,7 @@ Training and evaluation is done in a Jupyter notebook (see [training/image_class
 
 Instructions how to install, train and use this classifier with Home Assistant see the Documentation or the github directory linked above.
 
+---
 
 ## Example Use Case
 
@@ -25,6 +28,8 @@ This classifier has been initially developed for a smart mailbox use case (TODO 
 It worked so well, such that the developer (Smart Home Rewired) to share its code for others to use it.
 
 The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. (see ▶️ [see the Youtube Series "Ultimate Smart Mailbox" part 1, 2, 3](https://www.youtube.com/channel/UChWTRp5MhretkMP-LKyA5-A))
+
+---
 
 
 ## AI theory used in this classifier

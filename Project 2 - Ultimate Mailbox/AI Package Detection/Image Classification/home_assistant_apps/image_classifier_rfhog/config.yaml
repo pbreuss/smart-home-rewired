@@ -1,6 +1,6 @@
 name: Image Classifier RFHOG by Smart Home Rewired
 description: Local HOG + color Random Forest image classifier that can be used i.e. for mailbox empty/occupied detection.
-version: "0.6.0"
+version: "0.7.0"
 slug: image_classifier_rfhog
 init: false
 arch:

@@ -1,6 +1,8 @@
-# This is the main automation
 alias: Mailbox / Mailslot - Photo notification / Indicator light
 description: ''
+
+# Run when either the mailbox door or mail slot closes.
+# Assumes these sensors report on = open and off = closed.
 triggers:
   - trigger: state
     entity_id:
@@ -8,77 +10,113 @@ triggers:
       - binary_sensor.garagenvorplatz_esp32cam_garagenvorplatz_briefklappe
     from: 'on'
     to: 'off'
+
 actions:
+  # Generate a timestamp and the snapshot filename for this run.
+  # The current directory must already exist.
   - variables:
-      timestamp: '{{ now().strftime(''%Y%m%d_%H%M%S'') }}'
-      current_image: /media/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg
-  - action: switch.turn_on # Turn on the light inside the mailbox.
+      timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
+      current_image: "/media/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
+
+  # Turn on the INTERIOR illumination used for taking the photo.
+  # This is separate from the exterior mail indicator.
+  - action: switch.turn_on
     target:
       entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
+
+  # Give the camera time to adjust its exposure to the light.
   - delay:
-      milliseconds: 3000 # Wait for 3 seconds such that the cam gets used to the light
-  - action: camera.snapshot # Take the snapshot
+      milliseconds: 3000
+
+  # Save a camera snapshot in the current directory.
+  - action: camera.snapshot
     target:
       entity_id: camera.esp32cam_mailbox_postbox_kamera
     data:
-      filename: '{{ current_image }}'
+      filename: "{{ current_image }}"
+
+  # Additional pause before requesting classification.
   - delay:
-      milliseconds: 1000 # Wait another second
-  - action: rest_command.image_classifier_rfhog # send the image to the Image Classifier RFHOG
+      milliseconds: 1000
+
+  # Ask the RFHOG App to classify this exact snapshot.
+  # The App must be able to access the same /media path.
+  - action: rest_command.image_classifier_rfhog
     data:
-      image: '{{ current_image }}'
+      image: "{{ current_image }}"
     response_variable: classifier_result
-  - variables:  # these are the return variables
-      rf_prediction: '{{ classifier_result.content.prediction }}'
-      rf_occupied_probability: '{{ classifier_result.content.occupied_probability | float }}'
+
+  # Read the predicted label and occupied-class probability.
+  # Convert the probability from 0–1 into a percentage.
+  - variables:
+      rf_prediction: "{{ classifier_result.content.prediction }}"
+      rf_occupied_probability: >-
+        {{ classifier_result.content.occupied_probability | float }}
       rf_occupied_percent: >-
-        {{ (classifier_result.content.occupied_probability | float * 100) |
-        round(1) }}
-  # use this part if you have the Image Classifier RFHOG installed
+        {{ (classifier_result.content.occupied_probability | float * 100)
+           | round(1) }}
+
   - choose:
+      # EMPTY: archive the image and switch off the exterior indicator.
       - conditions:
           - condition: template
-            value_template: '{{ rf_prediction == ''empty'' }}'
+            value_template: "{{ rf_prediction == 'empty' }}"
         sequence:
-          - action: shell_command.mailbox_archive # save the image in the empty folder
+          # mailbox_archive should use cp if the current image is to remain.
+          # RF in the filename records the occupied probability,
+          # even though this image was classified as empty.
+          - action: shell_command.mailbox_archive
             data:
-              source: '{{ current_image }}'
+              source: "{{ current_image }}"
               destination: >-
-                /media/mailbox_dataset/empty/mailbox_{{ timestamp
-                }}_RF-{{ rf_occupied_percent }}.jpg
+                /media/mailbox_dataset/empty/mailbox_{{ timestamp }}_RF-{{ rf_occupied_percent }}.jpg
+
           - action: light.turn_off
             target:
               entity_id: light.esp32cam_garagenvorplatz_mailbox_camera_led
+
+    # Any prediction other than "empty" enters this branch.
+    # With your two-class model, the other label is "occupied".
+    # This is not an error handler: earlier action failures may stop the run.
     default:
-      - action: shell_command.mailbox_archive # save the image in occupied
+      - action: shell_command.mailbox_archive
         data:
-          source: '{{ current_image }}'
+          source: "{{ current_image }}"
           destination: >-
-            /media/mailbox_dataset/occupied/mailbox_{{ timestamp
-            }}_RF-{{ rf_occupied_percent }}.jpg
+            /media/mailbox_dataset/occupied/mailbox_{{ timestamp }}_RF-{{ rf_occupied_percent }}.jpg
+
+      # Send a photo notification, choosing an icon based on the trigger.
       - action: notify.mobile_app_philipps_iphone_15
         data:
-          title: >
+          title: >-
             {% if trigger.entity_id ==
             'binary_sensor.esp32cam_mailbox_postbox_tur' %}
-              📬 New mail has arrived!
+              📬 You've got mail!
             {% else %}
-              ✉️ New mail has arrived!
+              ✉️ You've got mail!
             {% endif %}
-          message: >
-            There is something in the mailbox. {{ rf_occupied_percent }}%
-            occupied
+          message: >-
+            There is something in the mailbox.
+            {{ rf_occupied_percent }}% occupied
           data:
-            image: >-
-              /media/mailbox_dataset/current/mailbox_{{ timestamp
-              }}.jpg
+            # Notifications need a URL, not a filesystem path.
+            # Home Assistant serves files stored in /media/ through /media/local/.
+            # "local" is a URL prefix; no folder named "local" needs to be created.
+            image: "/media/local/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
+
+      # Turn on the EXTERIOR mail indicator at low brightness.
       - action: light.turn_on
         target:
           entity_id: light.esp32cam_garagenvorplatz_mailbox_camera_led
         data:
           brightness_pct: 5
+
+  # Turn off the interior photo illumination after processing.
+  # If an earlier action fails, this step may not be reached.
   - action: switch.turn_off
     target:
       entity_id: switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test
+
+# Process runs sequentially; allow up to five running/queued runs combined.
 mode: queued
 max: 5

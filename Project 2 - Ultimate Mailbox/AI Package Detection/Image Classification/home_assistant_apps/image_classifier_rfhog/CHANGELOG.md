@@ -14,3 +14,6 @@
 
 ## 0.5.0
 - fixed documentation
+
+## 0.6.0
+- added logo

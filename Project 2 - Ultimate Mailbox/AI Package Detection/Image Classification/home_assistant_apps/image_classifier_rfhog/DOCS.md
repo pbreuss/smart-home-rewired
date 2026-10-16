@@ -1,171 +1,311 @@
-# Image Classifier RFHOG - Documentation
-by Smart Home Rewired, Oct 2026
+# Image Classifier RFHOG — Setup and training guide
+by Smart Home Rewired
 
-**A lightweight, fully local image-classification Home Assistant App based on Random Forest and HOG, that can be used to classify images from within a Home Assistant.**
+Train your own image classifier and use it locally in Home Assistant automations. This guide uses a smart mailbox as the example: a camera takes a photo, the classifier predicts `empty` or `occupied`, and Home Assistant sends a notification when mail is detected.
 
-**This documention describes how you can use Image Classifier RFHOG for your own projects based on the mailbox use case.**
+The tutorial is intentionally basic, so you can train an AI model and learn how it works with little or no programming experience.
 
-This tutorial is intentionally simple, so you can train your own AI model and learn how it works—even with little or no programming experience. If you get stuck, the way to get support is to ask AI (Google Gemini, ChatGPT, Claude).
+Training runs on your computer. The trained model runs in the Home Assistant App. Images do not need to be sent to a cloud AI service.
 
-Also the Youtube video "Ultimate Smart Mailbox - Part 3 - How to add AI" contains a step-by-step walk-through.
+## Before you begin
 
-## Prerequisites:
+You need:
 
-These instructions are for **Home Assistant OS**. If you use **Home Assistant Container**, you’ll need to run the classifier as a separate Docker container. That setup is not covered in this guide.
+- **Home Assistant OS**, with your camera and door or mail-slot sensor already working.
+- The **Home Assistant Companion app** on your phone if you want photo notifications.
+- A computer with **Python 3.12** and **Git** installed. Python 3.12 matches the App’s current runtime.
+- The **Samba Share** App for the file-transfer method used in this guide, and **File editor** to edit Home Assistant configuration.
 
-## STEP 0 - Install necessary apps
-Home Assistant --> Services --> Apps --> Install Apps: 
-- Samba Share
-- File Editor
+Install the Home Assistant Apps under **Settings → Apps → Install App**. Configure Samba Share with a username and password, then start it. Home Assistant’s **Developer tools** are built in; they do not require a separate App. Depending on your version, they may appear as **Settings → Tools**.
 
-Home Assistant
-[Developer Tools](https://www.home-assistant.io/docs/tools/dev-tools/) are optional, but very useful for debugging
+This guide covers Home Assistant OS. Home Assistant Container requires running the classifier as a separate container; that setup is outside this guide.
 
-On your Mac or Windows PC, install Visual Studio Code and Python 3.
+A NAS, Frigate, and Apple HomeKit are optional. They are part of the original mailbox project, but are not required by the classifier.
 
-1. Open a terminal app/Powershell (on your system of choice, Mac, Windows, Linux), cd to a directory of your choice, type 
-<code>git clone https://github.com/pbreuss/smart-home-rewired.git</code>
-This will download the code to your local machine.
+## 1. Prepare the folders
 
-## STEP 1 - Setup the directories for training
+Connect to Home Assistant’s Samba shares from your computer:
 
-As described in the beginning of this [Home Assistant tutorial](https://developers.home-assistant.io/docs/apps/tutorial), use Samba Share to access the directory of your Home Assistant installation. In the Finder (Mac OS) or File Explorer (Windows), find the directory /media. Create the following subdirectories within /media.
+- **macOS:** Finder → Go → Connect to Server, then enter `smb://HOME_ASSISTANT_IP`.
+- **Windows:** enter `\\HOME_ASSISTANT_IP` in File Explorer’s address bar.
 
-```text
-/media/
-├── image_classifier_rfhog/
-│   ├── mailbox_rfhog.joblib   # This will be your trained classifier model
-│   └── reference_image/       # Test images: at least one empty and one occupied
-│
-└── mailbox_dataset/
-    ├── current/               # All snapshots are initially saved here
-    ├── empty/                 # Images classified as an empty mailbox
-    └── occupied/              # Images classified as containing mail or a package
+Replace `HOME_ASSISTANT_IP` with your Home Assistant IP address and sign in with your Samba credentials. Open the **media** share.
+
+Create these folders. Paths in this table are how Home Assistant sees them; the `media` share itself corresponds to `/media`.
+
+| Home Assistant path | Purpose |
+| --- | --- |
+| `/media/image_classifier_rfhog/` | The trained model and its metadata |
+| `/media/image_classifier_rfhog/reference_image/` | Images for testing the installed App |
+| `/media/mailbox_dataset/current/` | Original camera snapshots |
+| `/media/mailbox_dataset/empty/` | Labeled images of an empty mailbox |
+| `/media/mailbox_dataset/occupied/` | Labeled images containing mail or packages |
+
+The file `mailbox_rfhog.joblib` will be created during training. Do not create an empty file with that name.
+
+Samba is used here to access your files. The classifier itself will be installed directly from GitHub, so you do not need to copy its source code into `/addons`.
+
+## 2. Collect and label training images
+
+First, make the mailbox work without AI.
+
+1. Open **Settings → Automations & scenes → Create automation** and create an empty automation.
+2. Open its menu and choose **Edit in YAML**.
+3. Paste the contents of [postbox-closes-automation-no-ai.yaml](https://github.com/pbreuss/smart-home-rewired/blob/main/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration/postbox-closes-automation-no-ai.yaml).
+4. Replace the example door/mail-slot sensors, camera, illumination switch, and mobile notification action with your own.
+5. Save the automation and test it by opening and closing the mailbox.
+
+The example assumes sensors report `on` when open and `off` when closed. Adjust the trigger if your sensors behave differently. If your mailbox has no controllable illumination, remove the illumination actions.
+
+Each run should save a photo in `/media/mailbox_dataset/current/` and send a photo notification. Check that the image is clear and shows the mailbox contents. If it is dark or black, fix the lighting or camera exposure before collecting training images.
+
+Collect both empty and occupied examples over several days. Include different envelopes, newspapers, small and large parcels, object positions, lighting conditions, shadows, and reflections. Difficult examples—such as a white envelope against a bright floor—are particularly useful. Keep the two classes reasonably balanced.
+
+Manually copy each usable image into the correct folder:
+
+- **`empty`:** no mail or package is present.
+- **`occupied`:** mail, a newspaper, or a package is present.
+
+This is **labeling**: the folder name tells the model the correct answer. Keep each labeled image in only one class folder. Originals can remain in `current`; the notebook reads only `empty` and `occupied`.
+
+Avoid collecting many nearly identical images of the same delivery. Variety matters more than repeated photos of one scene.
+
+## 3. Set up the training tools
+
+On your computer, open Terminal or PowerShell in a folder where you want to download the project:
+
+```bash
+git clone https://github.com/pbreuss/smart-home-rewired.git
+cd "smart-home-rewired/Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification/training/image_classifier_rfhog_training"
 ```
 
-## STEP 2 - Setup the Home Assistant automation to collect training images
+Create a virtual environment to keep the training packages separate from other Python software.
 
-Go to Settings --> Automations --> Create new automation and name it "Maildoor closes", go to 3 dots on the top right, Edit in Yaml, and then copy [postbox-closes-automation-no-ai.yaml](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration) into this editor.
+**macOS / Linux** — with Python 3.12 installed:
 
-You will have to adjust this automation such that it is triggered by your own hardware (REED sensor, camera, ..).
-
-The idea is, that based on your triggers, the yaml script postbox-closes-automation-no-ai.yaml saves each new image to the directory named "current".
-
-With this automation, the mailbox is already useful: it sends a notification with an image to your smartphone and also saves each camera image each time the mailbox closes. Each image with mail, and each image with an empty mailbox will later be use for training the classifier.
-
-You can now wait a few of days to collect training images.
-
-After a couple of days, copy all the images with mail to /media/mailbox_dataset/occupied and all the empty images, where you see the empty mailbox to /media/mailbox_dataset/empty. This is called the "labeling step in the training process", because by manually copying each image to the correct directry, you're essentially "assigning a label to each image". 
-
-## STEP 3 - Training a model
-
-1. Open the Terminal/Powershell app, navigate to the directory Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification/training/image_classifier_rfhog_training.
-
-2. Create a virtual environment. A virtual environment keeps the training tools separate from other Python packages on your computer. 
-
-```text
-python -m venv image-classifier-rfhog-venv
-source image-classifier-rfhog-venv/bin/activate
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
 ```
 
-Type into the terminal the following to install packages 
-```text
+**Windows PowerShell:**
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, use Command Prompt in the same folder and run `.venv\Scripts\activate.bat` instead.
+
+With the environment active, install the training packages and open JupyterLab:
+
+```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements-training.txt
+python -m jupyterlab
 ```
 
-3. code . (This opens VSC)
-4. open image_classifier_rfhog_training.ipynb
-5. Adjust the path in 
-```text
+JupyterLab opens in your browser. Open `image_classifier_rfhog_training.ipynb` there. This route does not require Visual Studio Code.
+
+## 4. Train and evaluate your model
+
+In the notebook, find the cell containing `DATASET_DIR`, `MODEL_OUT`, and `METADATA_OUT`. Set these to paths **your computer can access**.
+
+For example, on a Mac where the Home Assistant media share is mounted at `/Volumes/media`:
+
+```python
 DATASET_DIR = Path("/Volumes/media/mailbox_dataset")
 MODEL_OUT = Path("/Volumes/media/image_classifier_rfhog/mailbox_rfhog.joblib")
 METADATA_OUT = Path("/Volumes/media/image_classifier_rfhog/mailbox_rfhog_metadata.json")
 ```
-6. Go through all the cells to train model - see the youtube video linked above.
 
-If all goes well, the model in the image_classifier_rfhog has been updated based on your training images.
-If you want to test training without your own training images, there is a mailbox_dataset_demo dataset in training/image_classifier_rfhog_training you can use. 
+On Windows, if the media share is mapped to drive `M:`:
 
+```python
+DATASET_DIR = Path("M:/mailbox_dataset")
+MODEL_OUT = Path("M:/image_classifier_rfhog/mailbox_rfhog.joblib")
+METADATA_OUT = Path("M:/image_classifier_rfhog/mailbox_rfhog_metadata.json")
+```
 
-## STEP 4 - Install the Image Classification RFHOG classifier as Home Assistent App
+Use your actual mount location or drive letter. If you train from a local copy instead, set local paths and copy the resulting model into Home Assistant’s media share afterward. Make sure the output folder exists before running the save cell.
 
-1. In Home Assistant, go to Settings —> Apps —> Install App —> 3 dots —> repositories —> add GitHub url: https://github.com/pbreuss/smart-home-rewired.git
-2. Klick the back arrow on the top left, scroll down, find Image Classifier RFHOG under Smart Home Rewired
-3. Click on it, and then click install, wait, notice the Hostname and note it down
-4. When done, click on Configure, and enter the path to your newly trained model /media/image_classifier_rfhog/mailbox_rfhog.joblib and the path to one of the reference images: /media/image_classifier_rfhog/reference_image/ref_image_occupied.jpg. Make sure that a reference image is in this directory.
-5. Go to File Editor and open configuration.yaml - Note: Hostname must match the hostname from above
+Run the notebook cells from top to bottom. The notebook:
+
+1. Loads labeled images and extracts edge, color, and image-statistics features.
+2. Splits the images into **80% for training** and **20% for testing**.
+3. Trains a Random Forest on the training images.
+4. Evaluates predictions on the test images and displays mistakes.
+5. Saves the trained model and a metadata file.
+
+Pay particular attention to a **false empty**: mail is present, but the model predicts `empty`. Review the confusion matrix, occupied-class recall, and the displayed mistakes rather than relying on accuracy alone.
+
+The split is made by image. Almost identical photos from the same delivery can therefore end up in both sets and make results look better than they are. Also test with new deliveries photographed after training. The model’s probability is a useful score, not a guarantee that the prediction is correct.
+
+After saving, confirm this file exists in Home Assistant’s media share:
 
 ```text
-rest_command:
+/media/image_classifier_rfhog/mailbox_rfhog.joblib
+```
 
-  ## this is our api call to the image classifier rfhog
+The metadata JSON records training information; the App loads the `.joblib` file.
+
+You can explore the included `mailbox_dataset_demo` first, but train on images from your own camera before using the classifier for your mailbox.
+
+## 5. Install and configure the Home Assistant App
+
+1. In Home Assistant, open **Settings → Apps → Install App**.
+2. Open **⋮ → Repositories** and add:
+
+   ```text
+   https://github.com/pbreuss/smart-home-rewired
+   ```
+
+3. Close the dialog, find **Image Classifier RFHOG** under **Smart Home Rewired**, and select **Install**.
+4. Note the App’s displayed hostname for the REST commands in the next step.
+
+Copy one occupied photo and one empty photo into `reference_image`, naming them `ref_image_occupied.jpg` and `ref_image_empty.jpg`. Use actual JPEG images for these filenames.
+
+In the installed App’s **Configuration** tab, enter:
+
+```yaml
+model_path: "/media/image_classifier_rfhog/mailbox_rfhog.joblib"
+default_image: "/media/image_classifier_rfhog/reference_image/ref_image_occupied.jpg"
+```
+
+These are Home Assistant paths, not your computer’s `/Volumes/...` or `M:/...` paths. If the Configuration tab shows separate fields, enter each value in its corresponding field. In its YAML editor, use the example above without an `options:` wrapper.
+
+Save and start the App. Open its web UI and check that it reports **model loaded**. Enable **Start on boot** if you want the classifier available after a reboot.
+
+The App already includes access to Home Assistant’s `/media` directory. You do not need to add a `map:` entry to its Configuration tab.
+
+## 6. Connect Home Assistant to the classifier
+
+Use File editor to open Home Assistant’s `configuration.yaml`. Add:
+
+```yaml
+rest_command:
+  # Classify the requested image, or use the default image if none is supplied.
   image_classifier_rfhog:
     url: "http://32878c6d-image-classifier-rfhog:8098/classify"
     method: POST
     content_type: "application/json"
-    payload: >
-      {
-        "image": "{{ image }}"
-      }
+    payload: >-
+      {{ {"image": image | default("")} | to_json }}
 
-      
+  # Load a replacement model after retraining.
+  image_classifier_rfhog_reload:
+    url: "http://32878c6d-image-classifier-rfhog:8098/reload"
+    method: POST
+
 shell_command:
-  # this command copies the new image from current to either occupied or empty
+  # Keep the original photo and copy it into the predicted class folder.
   mailbox_archive: 'cp "{{ source }}" "{{ destination }}"'
-
 ```
 
-6. Restart Home Assistant: In Home Assistant go to Settings --> Tools --> Tab YAML --> click "Check Configuration" --> then click Restart
+The hostname above is for this repository installation. If your App displays a different hostname, replace it in **both** URLs. These are internal addresses used by Home Assistant, not addresses to open in your computer’s browser.
 
-7. Wait for Home Assistant to be restarted
+If you already have a `rest_command:` or `shell_command:` section, merge the new commands into that section. Do not create duplicate top-level sections or replace your existing configuration.
 
+Check the configuration under **Developer tools → YAML** (or **Settings → Tools → YAML**), then restart Home Assistant to load the new commands.
 
-## STEP 5 - Test your integration
+## 7. Test the classifier before enabling AI automation
 
- Test the Image Classifier RFHOG HA app
- 1. Go back to Settings —> Apps —> Image Classifier RFHOG —> Click Start
- 2. Go to Settings —> Tools —> Actions —> choose action „image_classifier_rfhog“, and copy this to action: „action: rest_command.image_classifier_rfhog“, click perform action
+Open **Developer tools → Actions**, switch to YAML mode, and run:
 
-This test calls the imge_classifier_rfhog endpoint with the default image that you supplied in the Configuration tab in the Home Assistant app "Image Classification RFHOG".
+```yaml
+action: rest_command.image_classifier_rfhog
+data: {}
+```
 
- Response should look like this:
+This uses the configured reference image. A successful response should contain values similar to these; your probabilities will differ:
 
-```text
+```yaml
 content:
-  classifier: hog_color_random_forest
-  empty_probability: 0.0975
-  feature_count: 9809
-  image: /media/image_classifier_rfhog/reference_image/ref_image_occupied.jpg
-  model_path: /media/image_classifier_rfhog/mailbox_rfhog.joblib
-  occupied_probability: 0.9025
   ok: true
   prediction: occupied
-  probabilities:
-    empty: 0.0975
-    occupied: 0.9025
+  occupied_probability: 0.9025
+  empty_probability: 0.0975
 status: 200
-headers:
-  Server: Werkzeug/3.1.9 Python/3.12.15
-  Date: Fri, 16 Oct 2026 07:12:47 GMT
-  Content-Type: application/json
-  Content-Length: '346'
-  Connection: close
 ```
 
-If not, check log in the Home Assistant app "Image Classification RFHOG".
+Next, explicitly test the empty reference image:
 
+```yaml
+action: rest_command.image_classifier_rfhog
+data:
+  image: "/media/image_classifier_rfhog/reference_image/ref_image_empty.jpg"
+```
 
-## STEP 6 - Update your Mail Door Closes automation to use the image classifier
+Check that both predictions match what is actually in the images. The reference images are for convenient testing; they do not train or calibrate the model. For a stronger check, also test images that were not used during training.
 
-Go to Settings --> Automations --> Choose your "Maildoor closes" automation, go to 3 dots on the top right, Edit in Yaml, and then copy [postbox-closes-automation-ai.yaml](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration) into this editor.
+## 8. Enable classification in your automation
 
+Open the **existing** mailbox-closes automation from Step 2. Replace its YAML with [postbox-closes-automation-ai.yaml](https://github.com/pbreuss/smart-home-rewired/blob/main/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration/postbox-closes-automation-ai.yaml), then adjust the entity IDs again.
 
-Now you're done! If everything works, when you close the mailbox, you should reive a notification only when the mailbox contains mail, and not after removing the mail.
+The AI example also uses an exterior indicator light. Replace that entity with yours, or remove those light actions if you do not have one. Its notification title contains a sensor-ID comparison; update that ID too, or use a fixed title.
 
-If you have problems, there is another [README](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Image%20Classification) in the github of this project with a Trouble Shooting section at the end.
+Keep only one mailbox-closes automation enabled to avoid duplicate runs.
 
----
+The example takes a snapshot, calls `rest_command.image_classifier_rfhog`, and reads the returned `prediction` and `occupied_probability`. It then:
 
+- **Empty:** copies the image into `empty` and turns off the exterior indicator.
+- **Occupied:** copies the image into `occupied`, sends a photo notification, and turns on the indicator.
 
+The original remains in `current` because the archive command uses `cp`.
 
+For photo notifications, distinguish the file path from the URL:
+
+| Use | Example |
+| --- | --- |
+| Camera snapshot and classifier input | `/media/mailbox_dataset/current/mailbox_20261016_120000.jpg` |
+| Notification image URL | `/media/local/mailbox_dataset/current/mailbox_20261016_120000.jpg` |
+
+`local` is part of the URL Home Assistant uses to serve the image. Do not create a folder named `local`.
+
+Test with an empty mailbox and then with mail inside. Trigger each test by opening and closing the actual door or mail slot: the example notification template uses information from that trigger. It sends a notification on every occupied classification, including when previously detected mail is still present.
+
+## 9. Improve the model over time
+
+The archived images provide more training material, but their folder names initially reflect the **model’s predictions**, which can be wrong.
+
+Before retraining, review the images and move incorrect examples into the correct class folder. Exclude unusable images and avoid adding duplicate copies of the same photo.
+
+Then:
+
+1. Run the training notebook again and review its test results.
+2. Back up the current model and replace it with the new `mailbox_rfhog.joblib` after saving completes.
+3. Run this action:
+
+   ```yaml
+   action: rest_command.image_classifier_rfhog_reload
+   data: {}
+   ```
+
+4. Test both reference images and some new images again.
+
+Restarting the classifier App also loads the replacement model. Retraining does not require rebuilding the App when the feature pipeline and package versions remain compatible. Keep the notebook’s feature extraction consistent with the App’s implementation.
+
+Snapshots and archived copies accumulate over time. Periodically remove images you no longer need, keeping photos available long enough for notification attachments to load.
+
+## Troubleshooting
+
+| Problem | What to check |
+| --- | --- |
+| App is missing from the store | Add the repository root URL from Step 5 and refresh the store. |
+| Model not found | Confirm the file exists and `model_path` exactly matches its Home Assistant path, including `rfhog` in the filename. |
+| Image not found | Confirm the image exists under `/media` and use its file path, without the notification URL’s extra `/local`. |
+| Cannot connect to the classifier | Check that the App is running and both REST commands use its hostname and port `8098`. |
+| Action is missing | Check the YAML and restart Home Assistant after adding the commands. |
+| Snapshot fails | Check the camera entity, the existing destination folder, and write permissions. |
+| Model loads but classification fails | Read the App logs. Check matching training/runtime dependency versions and identical feature extraction settings. |
+| Notification has no image | Check the `/media/local/...` URL, confirm the photo still exists, and verify your phone can reach Home Assistant. |
+| Predictions are poor | Inspect lighting, labels, image variety, and false-empty examples. Collect new representative images and retrain. |
+
+For classifier errors, open **Settings → Apps → Image Classifier RFHOG → Logs**. For automation failures, inspect the automation’s **Traces** to see which action failed. The example’s default branch is not an error handler: a failed classifier request can stop the automation before later actions run.
+
+## Further reading
+
+- [Project overview and technical reference](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Image%20Classification)
+- [Mailbox Home Assistant configuration examples](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration)
+- [Home Assistant RESTful Command documentation](https://www.home-assistant.io/integrations/rest_command/)
+- [Home Assistant Companion notification attachments](https://companion.home-assistant.io/docs/notifications/notification-attachments/)

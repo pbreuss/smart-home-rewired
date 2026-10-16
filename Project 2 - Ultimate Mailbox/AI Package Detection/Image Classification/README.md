@@ -1,4 +1,4 @@
-# Image Classifier RFHOG [![Add repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://github.com/pbreuss/smart-home-rewired)
+# Image Classifier RFHOG
 
 by Smart Home Rewired, Oct 2026
 

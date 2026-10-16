@@ -76,6 +76,8 @@ homekit:
         - switch.garagenvorplatz_esp32cam_mailbox_mailbox_led_test 
         
 rest_command:
+
+  # to do a classification on an image
   image_classifier_rfhog:
     url: "http://32878c6d-image-classifier-rfhog:8098/classify"
     method: POST
@@ -85,25 +87,10 @@ rest_command:
         "image": "{{ image }}"
       }  
 
-  image_compare:
-    url: "http://local-image-compare:8099/compare"
+  # call this to reload the model after training
+  image_classifier_rfhog_reload:
+    url: "http://32878c6d-image-classifier-rfhog:8098/reload"
     method: POST
-    content_type: "application/json"
-    payload: >
-      {
-        "current_image": "{{ current_image }}"
-      }
-      
-  mailbox_classifier:
-    url: "http://local-mailbox-classifier:8098/classify"
-    method: POST
-    content_type: "application/json"
-    payload: >
-      {
-        "image": "{{ image }}"
-      }     
-   
-
 
       
 shell_command:

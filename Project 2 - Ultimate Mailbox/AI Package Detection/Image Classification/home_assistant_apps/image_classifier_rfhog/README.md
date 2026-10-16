@@ -23,6 +23,11 @@ Detailed step-by-step instructions on how to install, train and use this classif
 
 This classifier has been initially developed for a [smart mailbox use case](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox) to evaluate images taken by a camera inside a mailbox. If the classifier determines that the image contains mail, a notification is sent.
 
+![Smart Mailbox automation](https://github.com/pbreuss/smart-home-rewired/blob/68c884425924a280dae7160e5a8a10860fce268f/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Image%20Classification/images/mail_automations_status_flow.gif?raw=true)
+
+This animation shows the flow of two Home Assistant mailbox automations: ‘Door opens’ and ‘Door closes.’ The complete YAML files are available in the [Home Assistant Configuration](https://github.com/pbreuss/smart-home-rewired/tree/68c884425924a280dae7160e5a8a10860fce268f/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration) folder.
+
+
 This method worked so well, such that the Smart Home Rewired team decided to share this code, such that other developers can use it as well.
 
 The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. (see ▶️ [see the Youtube Series "Ultimate Smart Mailbox" part 1, 2, 3](https://www.youtube.com/channel/UChWTRp5MhretkMP-LKyA5-A))
@@ -83,10 +88,6 @@ Mailbox door / mail slot closes
        ▼             ▼
  Notification     Status LED
 ```
-
-![Smart Mailbox automation](https://github.com/pbreuss/smart-home-rewired/blob/68c884425924a280dae7160e5a8a10860fce268f/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Image%20Classification/images/mail_automations_status_flow.gif?raw=true)
-
-This animation shows the flow of two Home Assistant mailbox automations: ‘Door opens’ and ‘Door closes.’ The complete YAML files are available in the [Home Assistant Configuration](https://github.com/pbreuss/smart-home-rewired/tree/68c884425924a280dae7160e5a8a10860fce268f/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration) folder.
 
 ---
 

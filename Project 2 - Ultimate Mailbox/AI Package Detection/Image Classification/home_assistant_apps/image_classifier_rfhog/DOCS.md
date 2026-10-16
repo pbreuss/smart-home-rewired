@@ -154,6 +154,8 @@ Go to Settings --> Automations --> Create new automation and name it "Maildoor c
 
 Now you're done! If everything works, when you close the mailbox, you should reive a notification only when the mailbox contains mail, and not after removing the mail.
 
+If you have problems, there is another [README](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Image%20Classification) in the github of this project with a Trouble Shooting section at the end.
+
 ---
 
 

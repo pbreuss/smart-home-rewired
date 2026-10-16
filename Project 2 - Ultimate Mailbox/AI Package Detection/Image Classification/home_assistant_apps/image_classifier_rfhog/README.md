@@ -28,9 +28,71 @@ This method worked so well, such that the Smart Home Rewired team decided to sha
 The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. (see ▶️ [see the Youtube Series "Ultimate Smart Mailbox" part 1, 2, 3](https://www.youtube.com/channel/UChWTRp5MhretkMP-LKyA5-A))
 
 ---
+## What it does
+
+A camera mounted inside the mailbox captures an image whenever mail may have been delivered (triggered by the mailbox door being closed). The classifier predicts one of two classes:
+
+- `empty`
+- `occupied`
+
+When deployed in Home Assistant, the result can be used to:
+
+- send a photo notification
+- switch on a mailbox status LED
+- update a dashboard
+- trigger another automation
+- archive images for future retraining
+
+Typical flow Automation "Mail door opens":
+
+```text
+Mailbox door / mail slot opens
+              │
+              ▼
+     Turn mailbox LED on
+```
 
 
-## AI theory used in this classifier
+Typical flow Automation "Mail door closes":
+
+```text
+Mailbox door / mail slot closes
+              │
+              ▼
+     Turn mailbox LED on
+              │
+              ▼
+     Home Assistant snapshot
+              │
+              ▼
+     Turn mailbox LED off
+              │
+              ▼
+      Image Classifier RFHOG App
+              │
+              ▼
+       HOG + color features
+              │
+              ▼
+         Random Forest
+              │
+              ▼
+      empty / occupied
+              │
+       ┌──────┴──────┐
+       ▼             ▼
+ Notification     Status LED
+```
+
+![Smart Mailbox automation](https://github.com/pbreuss/smart-home-rewired/blob/68c884425924a280dae7160e5a8a10860fce268f/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Image%20Classification/images/mail_automations_status_flow.gif?raw=true)
+
+This animation shows the flow of two Home Assistant mailbox automations: ‘Door opens’ and ‘Door closes.’ The complete YAML files are available in the [Home Assistant Configuration](https://github.com/pbreuss/smart-home-rewired/tree/68c884425924a280dae7160e5a8a10860fce268f/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration) folder.
+
+---
+
+
+
+## Why HOG + Random Forest? AI theory used in this classifier
 
 The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier (RF)**. Both are standard Machine Learning techniques. Also, this is where "RFHOG" in the name comes from.
 

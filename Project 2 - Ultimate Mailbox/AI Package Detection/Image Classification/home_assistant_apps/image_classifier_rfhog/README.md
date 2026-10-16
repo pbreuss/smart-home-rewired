@@ -97,7 +97,7 @@ Mailbox door / mail slot closes
 
 The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier (RF)**. Both are standard Machine Learning techniques. Also, this is where "RFHOG" in the name comes from.
 
-For many use cases, like checking the content of a mailbox, HOG + Random Forest work perfectly:
+For many use cases, like checking the content of a mailbox, can work well for controlled scenes:
 
 A mailbox is a relatively controlled environment:
 

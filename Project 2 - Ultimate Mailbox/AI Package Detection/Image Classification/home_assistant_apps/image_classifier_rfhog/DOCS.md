@@ -17,11 +17,13 @@ These instructions are for **Home Assistant OS**. If you use **Home Assistant Co
 Home Assistant --> Services --> Apps --> Install Apps: 
 - Samba Share
 - File Editor
-- [Developer Tools](https://www.home-assistant.io/docs/tools/dev-tools/) are optional, but very useful for debugging
+
+Home Assistant
+[Developer Tools](https://www.home-assistant.io/docs/tools/dev-tools/) are optional, but very useful for debugging
 
 On your Mac or Windows PC, install Visual Studio Code and Python 3.
 
-1. Open a terminal app (on your system of choice, Mac, Windows, Linux), cd to a directory of your choice, type 
+1. Open a terminal app/Powershell (on your system of choice, Mac, Windows, Linux), cd to a directory of your choice, type 
 <code>git clone https://github.com/pbreuss/smart-home-rewired.git</code>
 This will download the code to your local machine.
 
@@ -57,15 +59,17 @@ After a couple of days, copy all the images with mail to /media/mailbox_dataset/
 
 ## STEP 3 - Training a model
 
-1. Open the Terminal app, navigate to the directory Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification/training/image_classifier_rfhog_training.
+1. Open the Terminal/Powershell app, navigate to the directory Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification/training/image_classifier_rfhog_training.
 
 2. Create a virtual environment. A virtual environment keeps the training tools separate from other Python packages on your computer. 
 
 ```text
 python -m venv image-classifier-rfhog-venv
 source image-classifier-rfhog-venv/bin/activate
+```
 
 Type into the terminal the following to install packages 
+```text
 python -m pip install --upgrade pip
 python -m pip install -r requirements-training.txt
 ```
@@ -89,7 +93,7 @@ If you want to test training without your own training images, there is a mailbo
 1. In Home Assistant, go to Settings —> Apps —> Install App —> 3 dots —> repositories —> add GitHub url: https://github.com/pbreuss/smart-home-rewired.git
 2. Klick the back arrow on the top left, scroll down, find Image Classifier RFHOG under Smart Home Rewired
 3. Click on it, and then click install, wait, notice the Hostname and note it down
-4. When done, click on Configure, and enter the path to your newly trained model /media/image_classifier_rfhog/mailbox_rf.joblib and the path to one of the reference images: /media/image_classifier_rfhog/reference_image/ref_image_occupied.jpg
+4. When done, click on Configure, and enter the path to your newly trained model /media/image_classifier_rfhog/mailbox_rfhog.joblib and the path to one of the reference images: /media/image_classifier_rfhog/reference_image/ref_image_occupied.jpg. Make sure that a reference image is in this directory.
 5. Go to File Editor and open configuration.yaml - Note: Hostname must match the hostname from above
 
 ```text
@@ -104,6 +108,11 @@ rest_command:
       {
         "image": "{{ image }}"
       }
+
+      
+shell_command:
+  # this command copies the new image from current to either occupied or empty
+  mailbox_archive: 'cp "{{ source }}" "{{ destination }}"'
 
 ```
 
@@ -128,7 +137,7 @@ content:
   empty_probability: 0.0975
   feature_count: 9809
   image: /media/image_classifier_rfhog/reference_image/ref_image_occupied.jpg
-  model_path: /media/image_classifier_rfhog/mailbox_rf.joblib
+  model_path: /media/image_classifier_rfhog/mailbox_rfhog.joblib
   occupied_probability: 0.9025
   ok: true
   prediction: occupied
@@ -149,7 +158,7 @@ If not, check log in the Home Assistant app "Image Classification RFHOG".
 
 ## STEP 6 - Update your Mail Door Closes automation to use the image classifier
 
-Go to Settings --> Automations --> Create new automation and name it "Maildoor closes", go to 3 dots on the top right, Edit in Yaml, and then copy [postbox-closes-automation-ai.yaml](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration) into this editor.
+Go to Settings --> Automations --> Choose your "Maildoor closes" automation, go to 3 dots on the top right, Edit in Yaml, and then copy [postbox-closes-automation-ai.yaml](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/Home%20Assistant%20Configuration) into this editor.
 
 
 Now you're done! If everything works, when you close the mailbox, you should reive a notification only when the mailbox contains mail, and not after removing the mail.

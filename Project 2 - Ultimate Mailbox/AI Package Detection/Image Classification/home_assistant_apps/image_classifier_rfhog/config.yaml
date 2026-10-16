@@ -15,8 +15,9 @@ panel_icon: mdi:image-check-outline
 map:
   - media:rw
 options:
-  model_path: "/data/mailbox_rfhog.joblib"
-  default_image: "/media/current_mailbox.jpg"
+  model_path: "/media/image_classifier_rfhog/mailbox_rfhog.joblib"
+  default_image: "/media/image_classifier_rfhog/reference_image/ref_image_occupied.jpg"
+
 schema:
   model_path: str
   default_image: str

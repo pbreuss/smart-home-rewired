@@ -107,7 +107,7 @@ smart-home-rewired / Project 2 - Ultimate Mailbox/AI Package Detection / Image C
 │   └── mailbox_rfhog.joblib        # created after training
 │   └── mailbox_rfhog_metadata.json # auto generated, based on the last training run
 │
-├── home-assistant-apps/
+├── home_assistant_apps/
 │   └── image_classifier_rfhog/   # this is the app to be installed in Home Assistant
 │       ├── config.yaml
 │       ├── Dockerfile
@@ -126,14 +126,14 @@ The important separation is:
 
 - `training/` contains the training pipeline
 - DATASET_DIR contains labeled training images (to be setup in the training script)
-- `home-assistant-apps/image_classifier_rfhog/` contains the runtime service used inside Home Assistant
+- `home_assistant_apps/image_classifier_rfhog/` contains the runtime service used inside Home Assistant
 
 ---
 
 # 1. Development setup
 
 If you follow these instructions, please also look at, for additional information.
-├── home-assistant-apps/
+├── home_assistant_apps/
 │   └── image_classifier_rfhog/  
 │       └── README.md
 │       └── DOCS.md
@@ -156,7 +156,7 @@ For training:
 For Home Assistant deployment:
 
 - Home Assistant OS or another installation that supports local Apps/add-ons
-- the App files from `home-assistant-apps/image_classifier_rfhog/`
+- the App files from `home_assistant_apps/image_classifier_rfhog/`
 
 Optional:
 
@@ -192,8 +192,6 @@ mailbox_classifier_venv\Scripts\activate
 Install dependencies:
 
 ```bash
-pip install -r requirements.txt
-
 cd training/image_classifier_rfhog_training
 pip install -r requirements-training.txt
 ```
@@ -257,7 +255,7 @@ jupyter notebook
 Open:
 
 ```text
-train/image_classifier_rfhog_training/image_classifier_rfhog_training.ipynb
+training/image_classifier_rfhog_training/image_classifier_rfhog_training.ipynb
 ```
 
 and run the cells in sequence.
@@ -320,15 +318,14 @@ After training, the notebook creates:
 mailbox_rfhog.joblib
 ```
 
-For local development, place it in:
-
-```text
-models/mailbox_rfhog.joblib
-```
-
 The `.joblib` file contains the trained Random Forest model used for inference.
 
-Model training and App deployment are intentionally separated. You can retrain and replace the model without rebuilding the App, as long as the feature pipeline remains compatible.
+Make sure the new model is in the directory as configured in the Home Assistant app Configure page:
+
+```text
+/media/
+├── image_classifier_rfhog/models/mailbox_rfhog.joblib
+```
 
 ---
 
@@ -440,19 +437,11 @@ Replace that address with the IP address of your own Home Assistant installation
 
 # 7. Configure the App
 
-For a model stored on NAS/network storage:
+Open the App’s Configuration tab and enter the paths to your trained model and default test image.
 
 ```yaml
-options:
-  model_path: "/media/mailbox_rfhog.joblib"
-  default_image: "/media/current_mailbox.jpg"
-```
-
-The App also needs access to Home Assistant's media directory (so this setting needs to be in config.yaml):
-
-```yaml
-map:
-  - media:rw
+model_path: "/media/image_classifier_rfhog/mailbox_rfhog.joblib"
+default_image: "/media/image_classifier_rfhog/reference_image/ref_image_occupied.jpg"
 ```
 
 ---
@@ -466,7 +455,7 @@ The status page should report that the model was loaded successfully.
 For example:
 
 ```text
-Model: /media/mailbox_rfhog.joblib
+Model: /media/image_classifier_rfhog/mailbox_rfhog.joblib
 Status: model loaded
 ```
 
@@ -483,7 +472,7 @@ A successful response looks similar to:
   "ok": true,
   "classifier": "hog_color_random_forest",
   "model_loaded": true,
-  "model_path": "/media/frigate/mailbox_rfhog.joblib"
+  "model_path": "/media/mailbox_rfhog.joblib"
 }
 ```
 
@@ -530,7 +519,7 @@ POST /reload
 
 # 10. Connect the App to Home Assistant
 
-Add a REST command to Home Assistant's `configuration.yaml`:
+Add a REST command and Shell Command to Home Assistant's `configuration.yaml`:
 
 ```yaml
 rest_command:
@@ -542,6 +531,11 @@ rest_command:
       {
         "image": "{{ image }}"
       }
+
+shell_command:
+  # this command copies the new image from current to either occupied or empty
+  mailbox_archive: 'cp "{{ source }}" "{{ destination }}"'
+
 ``` 
 
 If `configuration.yaml` already contains a `rest_command:` section, add `image_classifier_rfhog:` below the existing commands instead of creating a second `rest_command:` section.
@@ -559,7 +553,7 @@ Take a snapshot first:
 ```yaml
 - variables:
     timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
-    current_image: "/media/frigate/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
+    current_image: "/media/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
 
 - action: camera.snapshot
   target:
@@ -720,7 +714,7 @@ Then reload the App Store.
 Check the configured model path:
 
 ```yaml
-model_path: "/media/mailbox_rfhog.joblib"
+model_path: "/media/image_classifier_rfhog/mailbox_rfhog.joblib"
 ```
 
 or:
@@ -759,7 +753,7 @@ and pass a path such as:
 or:
 
 ```text
-/media/frigate/mailbox_dataset/current/mailbox_20260917_120000.jpg
+/media/mailbox_dataset/current/mailbox_20260917_120000.jpg
 ```
 
 ---
@@ -811,7 +805,7 @@ Possible extensions include:
 # License
 
 The original code and configuration files in this repository are
-licensed under the [MIT License](LICENSE).
+licensed under the MIT License.
 
 You are welcome to use, modify, and share them for your own projects,
 including commercial projects. Please retain the copyright and

@@ -1,7 +1,7 @@
 # Image Classifier RFHOG
 by Smart Home Rewired, Oct 2026
 
-**A lightweight, fully local image-classification Home Assistant App, that can be used to classify images from within an automation.**
+**A lightweight, fully local image-classification Home Assistant App, that can be used to classify images from within a Home Assistant.**
 
 ---
 
@@ -9,23 +9,21 @@ by Smart Home Rewired, Oct 2026
 
 The github linked above contains instructions and a training ipynb file, that can be used to train your own classifier model based on your own images.
 
-After training according to the instructions (see Docs) copy the trained model to your /media directory in your Home Assistant OS installation (you might need Samba share to get access to the directory of your HA installation).
+After training, copy the trained model to your /media directory in your Home Assistant OS installation.
 
-Setup the path to the model in the Configuration page of this Home Assistant app.
+Setup the path to the model in the Configuration tab of this Home Assistant app.
 
-And then, after testing, you can use this classifier in your automations.
+Then you can use this classifier in Home Assistant, for example inside an automations, when a camera takes a picture, you can classify the image, and take an action based on the result of the classification.
 
-Training and evaluation is done in a Jupyter notebook (see [training/image_classifier_rfhog_training/image_classifier_rfhog_training.ipynb](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox/AI%20Package%20Detection/Image%20Classification), and the trained model can be deployed as a local **Home Assistant App** and called directly from Home Assistant automations.
-
-Instructions how to install, train and use this classifier with Home Assistant see the Documentation or the github directory linked above.
+Detailed step-by-step instructions on how to install, train and use this classifier with Home Assistant see the Documentation or the README in the github directory linked above.
 
 ---
 
-## Example Use Case
+## Example Use Case - Why you would do this
 
-This classifier has been initially developed for a smart mailbox use case (TODO add link) to evaluate images taken inside a mailbox triggered by an Home Assistant automation, to determine if the mailbox contains mail.
+This classifier has been initially developed for a [smart mailbox use case](https://github.com/pbreuss/smart-home-rewired/tree/main/Project%202%20-%20Ultimate%20Mailbox) to evaluate images taken by a camera inside a mailbox. If the classifier determines that the image contains mail, a notification is sent.
 
-It worked so well, such that the developer (Smart Home Rewired) to share its code for others to use it.
+This method worked so well, such that the Smart Home Rewired team decided to share this code, such that other developers can use it as well.
 
 The project was built as part of a larger Smart Mailbox system using ESP32-CAM components, Home Assistant, Frigate, a Synology NAS, and Apple HomeKit. (see ▶️ [see the Youtube Series "Ultimate Smart Mailbox" part 1, 2, 3](https://www.youtube.com/channel/UChWTRp5MhretkMP-LKyA5-A))
 
@@ -34,7 +32,7 @@ The project was built as part of a larger Smart Mailbox system using ESP32-CAM c
 
 ## AI theory used in this classifier
 
-The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier (RF)**. Both are standard Machine Learning techniques.
+The classifier combines **Histogram of Oriented Gradients (HOG)** with color and image-statistics features and a **Random Forest classifier (RF)**. Both are standard Machine Learning techniques. Also, this is where "RFHOG" in the name comes from.
 
 For many use cases, like checking the content of a mailbox, HOG + Random Forest work perfectly:
 
@@ -51,14 +49,14 @@ This makes traditional computer-vision features a good fit.
 
 The **Random Forest** combines those features to distinguish an empty mailbox from letters, newspapers, parcels, and other objects.
 
-This approach is lightweight, fast, fully local, and does not require cloud inference or a GPU or lots of RAM.
+This approach is lightweight, fast, fully local, and does not require cloud inference or a GPU nor lots of RAM.
 
 ---
 
 ## Requirements
 
-Currently supports Home Assistant OS
+These instructions are for **Home Assistant OS**. If you use **Home Assistant Container**, you’ll need to run the classifier as a separate Docker container. That setup is not covered in this guide.
 
 ---
 
-If you need a more advanced classifier, get in touch with us, and we might develp one for you.
+If you need a more advanced classifier, get in touch with us, and we might develop one for you.

@@ -9,7 +9,7 @@ triggers:
 actions:
   - variables:
       timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
-      current_image: "/media/frigate/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
+      current_image: "/media/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
 
   # Turn on the light inside the mailbox.
   - action: switch.turn_on
@@ -39,7 +39,7 @@ actions:
       title: "📬 Mailbox door closed"
       message: "The mailbox door was closed. Check the photo to see what's inside."
       data:
-        image: "/media/local/frigate/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
+        image: "/media/local/mailbox_dataset/current/mailbox_{{ timestamp }}.jpg"
 
 mode: queued
 max: 5

@@ -18,6 +18,7 @@ venv/
 env/
 ENV/
 image-classifier-rfhog-venv/
+smr_rf_classifier_venv/
 
 # Python packaging
 build/

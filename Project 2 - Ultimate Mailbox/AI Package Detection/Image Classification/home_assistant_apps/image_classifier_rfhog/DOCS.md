@@ -23,7 +23,7 @@ This guide covers Home Assistant OS. Home Assistant Container requires running t
 A NAS, Frigate, and Apple HomeKit are optional. They are part of the original mailbox project, but are not required by the classifier.
 
 ## 1. Prepare the folders
-
+ 
 Connect to Home Assistant’s Samba shares from your computer:
 
 - **macOS:** Finder → Go → Connect to Server, then enter `smb://HOME_ASSISTANT_IP`.

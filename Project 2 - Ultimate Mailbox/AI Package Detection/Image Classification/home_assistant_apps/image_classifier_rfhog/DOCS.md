@@ -181,7 +181,7 @@ The App already includes access to Home Assistant’s `/media` directory. You do
 ## 6. Connect Home Assistant to the classifier
 
 Use File editor to open Home Assistant’s `configuration.yaml`. Add:
-
+ 
 ```yaml
 rest_command:
   # Classify the requested image, or use the default image if none is supplied.

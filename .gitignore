@@ -17,7 +17,7 @@ venv/
 .venv/
 env/
 ENV/
-smr_rf_classifier_venv/
+image-classifier-rfhog-venv/
 
 # Python packaging
 build/
@@ -78,7 +78,6 @@ features/
 # OS thumbnails
 Thumbs.db
 
-mailbox_classifier_venv
 Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification/home_assistant_apps/image_compare/app.py
 Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification/home_assistant_apps/image_compare/CHANGELOG.md
 Project 2 - Ultimate Mailbox/AI Package Detection/Image Classification/home_assistant_apps/image_compare/config.yaml

@@ -1,6 +1,6 @@
 # Image Classifier RFHOG — Setup and training guide
 by Smart Home Rewired
-
+ 
 Train your own image classifier and use it locally in Home Assistant automations. This guide uses a smart mailbox as the example: a camera takes a photo, the classifier predicts `empty` or `occupied`, and Home Assistant sends a notification when mail is detected.
 
 The tutorial is intentionally basic, so you can train an AI model and learn how it works with little or no programming experience.

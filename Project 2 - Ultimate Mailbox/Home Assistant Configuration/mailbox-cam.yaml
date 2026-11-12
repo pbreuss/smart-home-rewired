@@ -48,7 +48,7 @@ binary_sensor:
 
   - platform: gpio
     id: muell_schiebe_sensor
-    name: "Trash Sliding Door"
+    name: "Müll-Schiebetür"
     device_class: opening
     pin:
       number: GPIO14
@@ -103,13 +103,13 @@ esp32_camera:
   on_stream_start:
     then:
       - logger.log: "Camera stream has been started"
-      - switch.turn_on: mailbox_led
+      #- switch.turn_on: mailbox_led
 
   on_stream_stop:
     then:
       - logger.log: "Camera stream has been stopped"
-      - delay: 5s
-      - switch.turn_off: mailbox_led
+      #- delay: 5s
+      #- switch.turn_off: mailbox_led
 
 esp32_camera_web_server:
   - port: 8080

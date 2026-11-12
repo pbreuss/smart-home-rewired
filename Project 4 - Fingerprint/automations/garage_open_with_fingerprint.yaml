@@ -1,0 +1,19 @@
+alias: Open garage with fingerprint
+description: Opens the garage after an authorized mailbox fingerprint scan
+triggers:
+  - trigger: event
+    event_type: esphome.garagefingerprint_matched
+conditions:
+  - condition: template
+    value_template: |
+      {{ 1 <= (trigger.event.data.finger_id | int(0)) <= 50 }}
+  - condition: garage_door.is_closed
+    target:
+      entity_id: cover.aichberg_garage_garage_aichberg
+    options:
+      for: '00:00:00'
+actions:
+  - action: cover.open_cover
+    target:
+      entity_id: cover.aichberg_garage_garage_aichberg
+mode: single

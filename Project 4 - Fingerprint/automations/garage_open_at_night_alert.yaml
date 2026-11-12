@@ -1,0 +1,26 @@
+alias: Garage Open at Night Alert
+description: ''
+triggers:
+  - device_id: 7b6030daa101ee38c11c20ea11ec7a66
+    domain: cover
+    entity_id: bdb613c43f87de2f8910fae57afeedfb
+    type: opened
+    trigger: device
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+conditions:
+  - condition: sun
+    after: sunset
+    after_offset:
+      hours: 0
+      minutes: 15
+      seconds: 0
+actions:
+  - action: notify.notify
+    metadata: {}
+    data:
+      message: Garage is still open!
+      title: Garage door open!
+mode: single

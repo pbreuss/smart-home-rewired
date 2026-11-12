@@ -1,0 +1,309 @@
+# ============================================================
+# ESP32 Garage Fingerprint Sensor
+# ============================================================
+# ESPHome configuration for an ESP32 connected to a
+# fingerprint sensor using UART.
+#
+# Main functions:
+#   - Detect and identify stored fingerprints
+#   - Send successful matches to Home Assistant as an event
+#   - Report fingerprint count, last ID and confidence
+#   - Enroll new fingerprints from Home Assistant
+#   - Delete individual or all stored fingerprints
+#
+# Board: Generic ESP32 Board
+# ============================================================
+
+
+# ------------------------------------------------------------
+# ESPHome device configuration
+# ------------------------------------------------------------
+esphome:
+  name: esp32u-garagefingerprint
+  friendly_name: esp32u-garagefingerprint
+
+
+# ------------------------------------------------------------
+# ESP32 hardware / framework
+# ------------------------------------------------------------
+esp32:
+  variant: esp32
+  framework:
+    type: arduino
+
+
+# ------------------------------------------------------------
+# Logging
+# ------------------------------------------------------------
+# Enables ESPHome logging, useful for debugging fingerprint
+# recognition, enrollment and UART communication.
+logger:
+
+
+# ------------------------------------------------------------
+# Home Assistant API
+# ------------------------------------------------------------
+# Allows Home Assistant to communicate directly with the ESP32.
+# Communication is encrypted using the configured API key.
+api:
+  encryption:
+    key: "xxx"
+
+
+# ------------------------------------------------------------
+# Over-the-Air updates
+# ------------------------------------------------------------
+# Allows future ESPHome firmware updates over Wi-Fi without
+# connecting the ESP32 via USB.
+ota:
+  - platform: esphome
+    encryption:
+
+
+# ------------------------------------------------------------
+# Wi-Fi
+# ------------------------------------------------------------
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # If the ESP32 cannot connect to the configured Wi-Fi,
+  # it creates this fallback access point.
+  ap:
+    ssid: esp32-garagefin Fallback Hotspot
+    password: "yyy"
+
+
+# Provides a configuration portal when the fallback AP is active.
+captive_portal:
+
+
+# ============================================================
+# FINGERPRINT SENSOR
+# ============================================================
+
+# ------------------------------------------------------------
+# UART connection
+# ------------------------------------------------------------
+# Serial communication between the ESP32 and fingerprint sensor.
+#
+# Wiring:
+#
+#   Fingerprint TX  --->  ESP32 GPIO16 (RX)
+#   Fingerprint RX  <---  ESP32 GPIO17 (TX)
+#   Fingerprint GND ----  ESP32 GND
+#   Fingerprint VCC ----  appropriate power supply
+#
+# TX and RX are crossed because data transmitted by one device
+# must be received by the other.
+#
+# Both devices communicate at 57600 baud.
+uart:
+  id: fingerprint_uart
+  rx_pin: GPIO16
+  tx_pin: GPIO17
+  baud_rate: 57600
+
+
+# ------------------------------------------------------------
+# Fingerprint reader
+# ------------------------------------------------------------
+# Uses ESPHome's fingerprint_grow component to communicate
+# with the fingerprint module.
+fingerprint_grow:
+  id: fingerprint_reader
+  uart_id: fingerprint_uart
+
+  on_enrollment_scan:
+    - text_sensor.template.publish:
+        id: fingerprint_enrollment_status
+        state: !lambda |-
+          if (scan_num == 1) {
+            return "Scan 1/2 accepted - lift finger, then place it again";
+          }
+          return "Scan 2/2 accepted - saving fingerprint...";
+
+    - logger.log:
+        format: "Enrollment ID %d: scan %d/2 accepted"
+        args:
+          - finger_id
+          - scan_num
+
+  on_enrollment_done:
+    - text_sensor.template.publish:
+        id: fingerprint_enrollment_status
+        state: !lambda |-
+          return "SUCCESS - fingerprint saved as ID " + to_string(finger_id);
+
+    - logger.log:
+        format: "Enrollment SUCCESS: fingerprint saved as ID %d"
+        args:
+          - finger_id
+
+  on_enrollment_failed:
+    - text_sensor.template.publish:
+        id: fingerprint_enrollment_status
+        state: !lambda |-
+          return "FAILED - enrollment for ID " + to_string(finger_id);
+
+    - logger.log:
+        format: "Enrollment FAILED for ID %d"
+        args:
+          - finger_id
+
+  
+  # Called when a scanned finger matches a fingerprint
+  # stored in the sensor.
+  on_finger_scan_matched:
+
+    # Write the matching fingerprint ID and confidence value
+    # to the ESPHome log.
+    - logger.log:
+        format: "Fingerprint matched: ID %d, confidence %d"
+        args:
+          - finger_id
+          - confidence
+
+    # Send an event to Home Assistant.
+    #
+    # Home Assistant can use this event in automations,
+    # for example to open the garage door.
+    #
+    # Event:
+    #   esphome.garagefingerprint_matched
+    #
+    # Event data example:
+    #   finger_id: 3
+    #   confidence: 185
+    - homeassistant.event:
+        event: esphome.garagefingerprint_matched
+        data:
+          finger_id: !lambda "return finger_id;"
+          confidence: !lambda "return confidence;"
+
+  # Called when a finger is detected but no stored
+  # fingerprint matches it.
+  on_finger_scan_unmatched:
+    - logger.log: "Unknown fingerprint"
+
+
+# ============================================================
+# FINGERPRINT INFORMATION IN HOME ASSISTANT
+# ============================================================
+text_sensor:
+  - platform: template
+    name: "Fingerprint Enrollment Status"
+    id: fingerprint_enrollment_status
+    icon: "mdi:fingerprint"
+
+
+sensor:
+  - platform: fingerprint_grow
+
+    # Number of fingerprint templates currently stored
+    # in the fingerprint sensor.
+    fingerprint_count:
+      name: "Stored Fingerprints"
+
+    # ID of the last successfully recognized fingerprint.
+    last_finger_id:
+      name: "Last Fingerprint ID"
+
+    # Confidence score of the last successful match.
+    # Higher values generally indicate a better match.
+    last_confidence:
+      name: "Last Fingerprint Confidence"
+
+# ============================================================
+# FINGERPRINT MANAGEMENT
+# ============================================================
+
+# ------------------------------------------------------------
+# Fingerprint ID selector
+# ------------------------------------------------------------
+# Creates a number entity in Home Assistant.
+#
+# Before enrolling or deleting a fingerprint, select the
+# fingerprint ID here.
+#
+# Example:
+#   ID 1 -> Person 1
+#   ID 2 -> Person 2
+#   ID 3 -> Person 3
+#
+# The selected value is restored after an ESP32 restart.
+number:
+  - platform: template
+    name: "Fingerprint ID"
+    id: fingerprint_id
+    optimistic: true
+
+    # Allowed fingerprint IDs
+    min_value: 1
+    max_value: 50
+    step: 1
+
+    # Default selected ID
+    initial_value: 1
+
+    # Remember the selected ID across ESP32 restarts.
+    restore_value: true
+
+
+# ------------------------------------------------------------
+# Fingerprint management buttons
+# ------------------------------------------------------------
+# These buttons appear as entities in Home Assistant.
+button:
+
+  # ----------------------------------------------------------
+  # ENROLL
+  # ----------------------------------------------------------
+  # Stores a new fingerprint under the ID selected above.
+  #
+  # The fingerprint template itself is stored in the
+  # fingerprint sensor, not on the ESP32.
+  #
+  # With num_scans: 2, the same finger must be scanned twice
+  # during enrollment.
+  - platform: template
+    name: "Enroll Fingerprint"
+    icon: "mdi:fingerprint"
+    on_press:
+      - text_sensor.template.publish:
+          id: fingerprint_enrollment_status
+          state: "Place finger on sensor - waiting for scan 1/2"
+
+      - fingerprint_grow.enroll:
+          finger_id: !lambda 'return (uint16_t) id(fingerprint_id).state;'
+          num_scans: 2
+
+
+  # ----------------------------------------------------------
+  # DELETE ONE FINGERPRINT
+  # ----------------------------------------------------------
+  # Deletes the fingerprint stored under the currently
+  # selected Fingerprint ID.
+  - platform: template
+    name: "Delete Fingerprint"
+    icon: "mdi:fingerprint-off"
+
+    on_press:
+      - fingerprint_grow.delete:
+          finger_id: !lambda 'return (uint16_t) id(fingerprint_id).state;'
+
+
+  # ----------------------------------------------------------
+  # DELETE ALL FINGERPRINTS
+  # ----------------------------------------------------------
+  # WARNING:
+  # Deletes ALL fingerprint templates stored in the sensor.
+  #
+  # Firmware updates, ESP32 restarts and normal flashing do
+  # NOT delete the fingerprints. This command does.
+  - platform: template
+    name: "Delete All Fingerprints"
+    icon: "mdi:delete"
+
+    on_press:
+      - fingerprint_grow.delete_all:
